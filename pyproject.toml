@@ -2,10 +2,13 @@
 name = "AutoARM"
 version = "0.1.0"
 description = ""
-authors = ["firefly-cpp <iztok@iztok-jr-fister.eu>"]
+authors = ["Iztok Fister Jr. <iztok@iztok-jr-fister.eu>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+niapy = "^2.0.0"
+niaaml = "^1.1.7"
+pandas = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
