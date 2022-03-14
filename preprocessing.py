@@ -1,4 +1,4 @@
-from autoarm.preprocessing import FeatureSelection
+from niaautoarm.preprocessing import FeatureSelection
 
 fs = FeatureSelection("datasets/dataset1.csv")
 

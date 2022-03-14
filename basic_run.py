@@ -1,4 +1,4 @@
-from autoarm import AutoARM
+from niaautoarm import NiaAutoARM
 from niaarm.dataset import Dataset
 from niapy.algorithms.basic import ParticleSwarmAlgorithm, DifferentialEvolution
 from niapy.task import Task, OptimizationType
@@ -35,7 +35,7 @@ evaluations = ["support", "confidence", "shrinkage", "coverage"]
 # 0, 1 represents the range of search space
 # features represent the list of features, while transactions depicts the list of transactions
 
-problem = AutoARM(dimension, 0, 1, features, transactions, preprocessing, algorithms, hyperparameters, evaluations)
+problem = NiaAutoARM(dimension, 0, 1, features, transactions, preprocessing, algorithms, hyperparameters, evaluations)
 
 # build niapy task
 task = Task(
