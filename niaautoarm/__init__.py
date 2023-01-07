@@ -1,9 +1,9 @@
 from niaautoarm.preprocessing import FeatureSelection
-from niaautoarm.autoarm import NiaAutoARM
+from niaautoarm.autoarm import AutoARM
 
 __all__ = [
     "FeatureSelection",
-    "NiaAutoARM"
+    "AutoARM"
 ]
 
 __project__ = "niaautoarm"

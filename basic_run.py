@@ -1,4 +1,4 @@
-from niaautoarm import NiaAutoARM
+from niaautoarm import AutoARM
 from niaarm.dataset import Dataset
 from niapy.algorithms.basic import ParticleSwarmAlgorithm, DifferentialEvolution
 from niapy.task import Task, OptimizationType
@@ -6,14 +6,8 @@ from niapy.task import Task, OptimizationType
 # load dataset from csv
 data = Dataset("datasets/Abalone.csv")
 
-# preprocess dataset and obtain features
-features = data.get_features()
-
 # calculate dimension of the problem
 dimension = 10
-
-# obtain transaction database
-transactions = data.transaction_data
 
 # define which preprocessing methods to use
 preprocessing = ["FeatureSelection", "HotCodeEncoding"]
@@ -28,14 +22,14 @@ algorithms = ["PSO", "DE", "GA", "FA"]
 hyperparameters = ["A", "B", "C"]
 
 # evaluation criterions
-evaluations = ["support", "confidence", "shrinkage", "coverage"]
+metrics = ["support", "confidence", "shrinkage", "coverage"]
 
 # Create a problem::: 
 # dimension represents dimension of the problem;
 # 0, 1 represents the range of search space
 # features represent the list of features, while transactions depicts the list of transactions
 
-problem = NiaAutoARM(dimension, 0, 1, features, transactions, preprocessing, algorithms, hyperparameters, evaluations)
+problem = AutoARM(dimension, 0, 1, preprocessing, algorithms, hyperparameters, metrics)
 
 # build niapy task
 task = Task(
