@@ -6,11 +6,13 @@ from niapy.task import Task, OptimizationType
 # load dataset from csv
 data = Dataset("datasets/Abalone.csv")
 
-# calculate dimension of the problem
-dimension = 10
+# set dimension of the problem
+# components = preprocessing (1) + algorithm (1) + hyperparameters (2 (NP,FES)) +
+# metrics (8, (support, confidence, lift, coverage, conviction, amplitude, inclusion, comprehensibility))
+dimension = 12 # can be extended when new components are added
 
 # define which preprocessing methods to use
-preprocessing = ["FeatureSelection", "HotCodeEncoding"]
+preprocessing = ["FeatureSelection", "HotCodeEncoding", "Squashing"]
 
 # feature selection algorithms
 fs = ["jDEFSTH", "PCA"]
@@ -18,11 +20,25 @@ fs = ["jDEFSTH", "PCA"]
 # algorithms for searching the association rules
 algorithms = ["PSO", "DE", "GA", "FA"]
 
-#hyperparameters
-hyperparameters = ["A", "B", "C"]
+#define hyperparameters and their min/max values
+hyperparameters = []
+
+hyperparameter1 = {
+    "parameter": "NP",
+    "min": "5",
+    "max": "75"
+    }
+
+hyperparameter2 = {
+    "parameter": "N_FES",
+    "min": "5000",
+    "max": "25000"
+    }
+# create array
+hyperparameters = [hyperparameter1, hyperparameter2]
 
 # evaluation criterions
-metrics = ["support", "confidence", "shrinkage", "coverage"]
+metrics = ["support", "confidence", "lift", "coverage", "conviction", "amplitude", "inclusion", "comprehensibility"]
 
 # Create a problem::: 
 # dimension represents dimension of the problem;
