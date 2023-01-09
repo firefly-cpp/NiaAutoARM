@@ -1,7 +1,7 @@
 from niaarm import NiaARM
 from niaarm.dataset import Dataset
 from niapy.problems import Problem
-from niapy.algorithms.basic import DifferentialEvolution
+from niapy.algorithms.basic import DifferentialEvolution, FireflyAlgorithm, ParticleSwarmAlgorithm, GeneticAlgorithm
 from niapy.task import Task, OptimizationType
 import numpy as np
 import csv
@@ -56,11 +56,11 @@ class AutoARM(Problem):
 
     # indicate whether the attribute is part of the component
     def threshold(self, component, val):
-        selected = [0] * len(component)
+        selected = []
         for i in range(len(val)):
             if val[i] > 0.5:
-                selected[i] = 1
-        return selected
+                selected.append(component[i])
+        return tuple(selected)
 
     def _evaluate(self, sol):
 
@@ -72,22 +72,27 @@ class AutoARM(Problem):
         print ("Izbrani algorithm: ", algorithm_component)
         hyperparameter_component = self.float_to_num(self.hyperparameters, sol[2:3])
         print ("Izbrane vrednosti hyp:", hyperparameter_component)
-        metrics_component = self.threshold(self.metrics, sol[4:12])
+        metrics_component = self.threshold(self.metrics, sol[4:10])
         print ("Izbrane metrics", metrics_component)
 
-        sys.exit(1)
-
+        # start building NiaARM task
         data = Dataset("datasets/Abalone.csv")
 
-        problem = NiaARM(data.dimension, data.features, data.transactions, metrics=('support', 'confidence'), logging=True)
+        problem = NiaARM(data.dimension, data.features, data.transactions, metrics=metrics_component, logging=True)
 
         # build niapy task
-        task = Task(problem=problem, max_iters=30, optimization_type=OptimizationType.MAXIMIZATION)
+        task = Task(problem=problem, max_evals=hyperparameter_component[1], optimization_type=OptimizationType.MAXIMIZATION)
 
         # use Differential Evolution (DE) algorithm from the NiaPy library
         # see full list of available algorithms: https://github.com/NiaOrg/NiaPy/blob/master/Algorithms.md
-        algo = DifferentialEvolution(population_size=50, differential_weight=0.5, crossover_probability=0.9)
-
+        if algorithm_component == "DE":
+            algo = DifferentialEvolution(population_size=hyperparameter_component[0], differential_weight=0.5, crossover_probability=0.9)
+        elif algorithm_component == "PSO":
+            algo = ParticleSwarmAlgorithm(population_size=hyperparameter_component[0], min_velocity=-4.0, max_velocity=4.0)
+        elif algorithm_component == "GA":
+            algo = GeneticAlgorithm(population_size=hyperparameter_component[0], crossover=uniform_crossover, mutation=uniform_mutation, crossover_rate=0.45, mutation_rate=0.9)
+        elif algorithm_component == "FA":
+            algo = FireflyAlgorithm(population_size=hyperparameter_component[0], alpha=1.0, beta0=0.2, gamma=1.0)
         # run algorithm
         best = algo.run(task=task)
 

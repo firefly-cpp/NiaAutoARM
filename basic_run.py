@@ -1,6 +1,7 @@
 from niaautoarm import AutoARM
 from niaarm.dataset import Dataset
-from niapy.algorithms.basic import ParticleSwarmAlgorithm, DifferentialEvolution
+from niapy.algorithms.basic import ParticleSwarmAlgorithm, DifferentialEvolution, FireflyAlgorithm
+from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
 from niapy.task import Task, OptimizationType
 
 # load dataset from csv
@@ -8,8 +9,8 @@ data = Dataset("datasets/Abalone.csv")
 
 # set dimension of the problem
 # components = preprocessing (1) + algorithm (1) + hyperparameters (2 (NP,FES)) +
-# metrics (8, (support, confidence, lift, coverage, conviction, amplitude, inclusion, comprehensibility))
-dimension = 12 # can be extended when new components are added
+# metrics (8, (support, confidence, lift, coverage, amplitude, inclusion, comprehensibility))
+dimension = 11 # can be extended when new components are added
 
 # define which preprocessing methods to use
 preprocessing = ["FeatureSelection", "HotCodeEncoding", "Squashing"]
@@ -38,7 +39,7 @@ hyperparameter2 = {
 hyperparameters = [hyperparameter1, hyperparameter2]
 
 # evaluation criterions
-metrics = ["support", "confidence", "lift", "coverage", "conviction", "amplitude", "inclusion", "comprehensibility"]
+metrics = ["support", "confidence", "coverage", "amplitude", "inclusion", "comprehensibility"]
 
 # Create a problem::: 
 # dimension represents dimension of the problem;
