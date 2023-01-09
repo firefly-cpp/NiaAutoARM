@@ -1,7 +1,6 @@
 from niaautoarm import AutoARM
 from niaarm.dataset import Dataset
-from niapy.algorithms.basic import ParticleSwarmAlgorithm, DifferentialEvolution, FireflyAlgorithm
-from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
+from niapy.algorithms.basic import ParticleSwarmAlgorithm, DifferentialEvolution
 from niapy.task import Task, OptimizationType
 
 # load dataset from csv
@@ -13,15 +12,18 @@ data = Dataset("datasets/Abalone.csv")
 dimension = 11 # can be extended when new components are added
 
 # define which preprocessing methods to use
+# TODO | No preprocessing techniques implemented for now
 preprocessing = ["FeatureSelection", "HotCodeEncoding", "Squashing"]
 
 # feature selection algorithms
+# TODO
 fs = ["jDEFSTH", "PCA"]
 
-# algorithms for searching the association rules
+# define algorithms for searching the association rules
 algorithms = ["PSO", "DE", "GA", "FA"]
 
-#define hyperparameters and their min/max values
+# define hyperparameters and their min/max values
+# for now only NP and max_evals (fes) are used; can be extended
 hyperparameters = []
 
 hyperparameter1 = {
@@ -44,14 +46,13 @@ metrics = ["support", "confidence", "coverage", "amplitude", "inclusion", "compr
 # Create a problem::: 
 # dimension represents dimension of the problem;
 # 0, 1 represents the range of search space
-# features represent the list of features, while transactions depicts the list of transactions
 
 problem = AutoARM(dimension, 0, 1, preprocessing, algorithms, hyperparameters, metrics)
 
 # build niapy task
 task = Task(
     problem=problem,
-    max_iters=3,
+    max_iters=1000,
     optimization_type=OptimizationType.MAXIMIZATION)
 
 # use Differential Evolution (DE) algorithm
@@ -66,4 +67,3 @@ algo2 = ParticleSwarmAlgorithm(
 
 # run algorithm
 best = algo.run(task=task)
-

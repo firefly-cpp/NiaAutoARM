@@ -1,7 +1,9 @@
+from niaautoarm import Stats
 from niaarm import NiaARM
 from niaarm.dataset import Dataset
 from niapy.problems import Problem
 from niapy.algorithms.basic import DifferentialEvolution, FireflyAlgorithm, ParticleSwarmAlgorithm, GeneticAlgorithm
+from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
 from niapy.task import Task, OptimizationType
 import numpy as np
 import csv
@@ -97,6 +99,8 @@ class AutoARM(Problem):
         best = algo.run(task=task)
 
         # sort rules
-        problem.rules.sort()
+        #problem.rules.sort()
 
-        return random.randint(0,2)
+        # log the best results
+
+        return best.fitness
