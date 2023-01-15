@@ -9,7 +9,7 @@ data = Dataset("datasets/Abalone.csv")
 # set dimension of the problem
 # components = preprocessing (1) + algorithm (1) + hyperparameters (2 (NP,FES)) +
 # metrics (8, (support, confidence, lift, coverage, amplitude, inclusion, comprehensibility))
-dimension = 11 # can be extended when new components are added
+dimension = 11  # can be extended when new components are added
 
 # define which preprocessing methods to use
 # TODO | No preprocessing techniques implemented for now
@@ -23,31 +23,26 @@ fs = ["jDEFSTH", "PCA"]
 algorithms = ["PSO", "DE", "GA", "FA"]
 
 # define hyperparameters and their min/max values
-# for now only NP and max_evals (fes) are used; can be extended
-hyperparameters = []
-
 hyperparameter1 = {
     "parameter": "NP",
-    "min": "5",
-    "max": "75"
-    }
+    "min": 5,
+    "max": 75
+}
 
 hyperparameter2 = {
     "parameter": "N_FES",
-    "min": "5000",
-    "max": "25000"
-    }
+    "min": 5000,
+    "max": 25000
+}
 # create array
 hyperparameters = [hyperparameter1, hyperparameter2]
 
-# evaluation criterions
+# evaluation criteria
 metrics = ["support", "confidence", "coverage", "amplitude", "inclusion", "comprehensibility"]
 
-# Create a problem::: 
-# dimension represents dimension of the problem;
-# 0, 1 represents the range of search space
+# Create a problem:::
 
-problem = AutoARM(dimension, 0, 1, preprocessing, algorithms, hyperparameters, metrics)
+problem = AutoARM(data, preprocessing, algorithms, hyperparameters, metrics, logging=True)
 
 # build niapy task
 task = Task(
