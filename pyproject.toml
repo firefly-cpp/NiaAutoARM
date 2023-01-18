@@ -2,7 +2,7 @@
 name = "NiaAutoARM"
 version = "0.1.0"
 description = "Automated Association Rule Mining"
-authors = ["Iztok Fister Jr. <iztok@iztok-jr-fister.eu>"]
+authors = ["Iztok Fister Jr. <iztok@iztok-jr-fister.eu>", "Žiga Stupan <ziga.stupan1@student.um.si>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
