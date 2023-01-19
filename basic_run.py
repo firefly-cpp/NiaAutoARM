@@ -61,4 +61,5 @@ algo2 = ParticleSwarmAlgorithm(
     max_velocity=4.0)
 
 # run algorithm
+print ("Starting optimization...")
 best = algo.run(task=task)
