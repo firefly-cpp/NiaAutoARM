@@ -21,10 +21,7 @@ def float_to_num(component, val):
 
 
 def threshold(component, val):
-    selected = []
-    for i in range(len(val)):
-        if val[i] > 0.5:
-            selected.append(component[i])
+    selected = [c for i, c in enumerate(component) if val[i] > 0.5]
     return tuple(selected)
 
 
@@ -103,7 +100,10 @@ class AutoARM(Problem):
             self.rules = problem.rules
 
             if self.logging:
-                print(f'Fitness: {self.best_fitness:.4f}'
+                print(f'Algorithm: {algorithm_component}'
+                      f' - Hyperparameters: {hyperparameter_component}'
+                      f' - Metrics: {metrics_component}\n'
+                      f'Fitness: {self.best_fitness:.4f}'
                       f' - Mean Support: {self.rules.mean("support"):.4f}'
                       f' - Mean Confidence: {self.rules.mean("confidence"):.4f}')
 
