@@ -6,18 +6,9 @@ from niapy.task import Task, OptimizationType
 # load dataset from csv
 data = Dataset("datasets/Abalone.csv")
 
-# set dimension of the problem
-# components = preprocessing (1) + algorithm (1) + hyperparameters (2 (NP,FES)) +
-# metrics (8, (support, confidence, lift, coverage, amplitude, inclusion, comprehensibility))
-dimension = 11  # can be extended when new components are added
-
 # define which preprocessing methods to use
-# TODO | No preprocessing techniques implemented for now
-preprocessing = ["FeatureSelection", "HotCodeEncoding", "Squashing"]
-
-# feature selection algorithms
-# TODO
-fs = ["jDEFSTH", "PCA"]
+# data squashing is now supported
+preprocessing = ["squash_euclid", "squash_cosine", "none"]
 
 # define algorithms for searching the association rules
 algorithms = ["PSO", "DE", "GA", "FA"]
@@ -41,7 +32,6 @@ hyperparameters = [hyperparameter1, hyperparameter2]
 metrics = ["support", "confidence", "coverage", "amplitude", "inclusion", "comprehensibility"]
 
 # Create a problem:::
-
 problem = AutoARM(data, preprocessing, algorithms, hyperparameters, metrics, logging=True)
 
 # build niapy task
