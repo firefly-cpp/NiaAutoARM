@@ -9,7 +9,7 @@ python = "^3.9"
 niapy = "^2.0.4"
 niaaml = "^1.1.11"
 pandas = "^1.4.0"
-niaarm = "^0.2.4"
+niaarm = "^0.3.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
