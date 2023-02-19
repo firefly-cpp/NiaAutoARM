@@ -29,10 +29,22 @@ hyperparameter2 = {
 hyperparameters = [hyperparameter1, hyperparameter2]
 
 # evaluation criteria
-metrics = ["support", "confidence", "coverage", "amplitude", "inclusion", "comprehensibility"]
+metrics = [
+    "support",
+    "confidence",
+    "coverage",
+    "amplitude",
+    "inclusion",
+    "comprehensibility"]
 
 # Create a problem:::
-problem = AutoARM(data, preprocessing, algorithms, hyperparameters, metrics, logging=True)
+problem = AutoARM(
+    data,
+    preprocessing,
+    algorithms,
+    hyperparameters,
+    metrics,
+    logging=True)
 
 # build niapy task
 task = Task(
@@ -41,8 +53,12 @@ task = Task(
     optimization_type=OptimizationType.MAXIMIZATION)
 
 # use Differential Evolution (DE) algorithm
-# see full list of available algorithms: https://github.com/NiaOrg/NiaPy/blob/master/Algorithms.md
-algo = DifferentialEvolution(population_size=50, differential_weight=0.5, crossover_probability=0.9)
+# see full list of available algorithms:
+# https://github.com/NiaOrg/NiaPy/blob/master/Algorithms.md
+algo = DifferentialEvolution(
+    population_size=50,
+    differential_weight=0.5,
+    crossover_probability=0.9)
 
 # use Particle swarm Optimization (PSO) algorithm from NiaPy library
 algo2 = ParticleSwarmAlgorithm(
@@ -51,5 +67,5 @@ algo2 = ParticleSwarmAlgorithm(
     max_velocity=4.0)
 
 # run algorithm
-print ("Starting optimization...")
+print("Starting optimization...")
 best = algo.run(task=task)

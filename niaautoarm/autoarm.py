@@ -19,7 +19,9 @@ def float_to_num(component, val):
     r"""Map float value to integer. """
     parameters = [1] * len(component)
     for i in range(len(component)):
-        parameters[i] = int(val * int(component[i]['max']) + int(component[i]['min']))
+        parameters[i] = int(val *
+                            int(component[i]['max']) +
+                            int(component[i]['min']))
 
     return parameters
 
@@ -59,12 +61,13 @@ class AutoARM(Problem):
             logging=False
     ):
         r"""Initialize instance of AutoARM.
-        
+
         Arguments:
-        
+
         """
         # calculate the dimension of the problem
-        dimension = calculate_dimension_of_the_problem(preprocessing, algorithms, hyperparameters, metrics)
+        dimension = calculate_dimension_of_the_problem(
+            preprocessing, algorithms, hyperparameters, metrics)
 
         super().__init__(dimension, 0, 1)
         self.dataset = dataset
@@ -80,9 +83,11 @@ class AutoARM(Problem):
 
         # firstly, genotype to phenotype mapping
         # print("Solution: ", sol)
-        preprocessing_component = self.preprocessing[float_to_category(self.preprocessing, sol[0])]
+        preprocessing_component = self.preprocessing[float_to_category(
+            self.preprocessing, sol[0])]
         # print("Izbrani preprocessing: ", preprocessing_component)
-        algorithm_component = self.algorithms[float_to_category(self.algorithms, sol[1])]
+        algorithm_component = self.algorithms[float_to_category(
+            self.algorithms, sol[1])]
         # print("Izbrani algorithm: ", algorithm_component)
         hyperparameter_component = float_to_num(self.hyperparameters, sol[2:3])
         # print("Izbrane vrednosti hyp:", hyperparameter_component)
@@ -92,26 +97,53 @@ class AutoARM(Problem):
         # perform data squashing if selected
 
         if preprocessing_component == "squash_euclidean":
-            self.dataset = squash(self.dataset, threshold=0.9, similarity='euclidean')
+            self.dataset = squash(
+                self.dataset,
+                threshold=0.9,
+                similarity='euclidean')
         elif preprocessing_component == "squash_cosine":
-            self.dataset = squash(self.dataset, threshold=0.9, similarity='cosine')
+            self.dataset = squash(
+                self.dataset,
+                threshold=0.9,
+                similarity='cosine')
 
-        problem = NiaARM(self.dataset.dimension, self.dataset.features, self.dataset.transactions, metrics=metrics_component)
+        problem = NiaARM(
+            self.dataset.dimension,
+            self.dataset.features,
+            self.dataset.transactions,
+            metrics=metrics_component)
 
         # build niapy task
-        task = Task(problem=problem, max_evals=hyperparameter_component[1], optimization_type=OptimizationType.MAXIMIZATION)
+        task = Task(
+            problem=problem,
+            max_evals=hyperparameter_component[1],
+            optimization_type=OptimizationType.MAXIMIZATION)
 
-        # see full list of available algorithms: https://github.com/NiaOrg/NiaPy/blob/master/Algorithms.md
+        # see full list of available algorithms:
+        # https://github.com/NiaOrg/NiaPy/blob/master/Algorithms.md
         if algorithm_component == "DE":
-            algo = DifferentialEvolution(population_size=hyperparameter_component[0], differential_weight=0.5,
-                                         crossover_probability=0.9)
+            algo = DifferentialEvolution(
+                population_size=hyperparameter_component[0],
+                differential_weight=0.5,
+                crossover_probability=0.9)
         elif algorithm_component == "PSO":
-            algo = ParticleSwarmAlgorithm(population_size=hyperparameter_component[0], min_velocity=-4.0, max_velocity=4.0)
+            algo = ParticleSwarmAlgorithm(
+                population_size=hyperparameter_component[0],
+                min_velocity=-4.0,
+                max_velocity=4.0)
         elif algorithm_component == "GA":
-            algo = GeneticAlgorithm(population_size=hyperparameter_component[0], crossover=uniform_crossover,
-                                    mutation=uniform_mutation, crossover_rate=0.45, mutation_rate=0.9)
+            algo = GeneticAlgorithm(
+                population_size=hyperparameter_component[0],
+                crossover=uniform_crossover,
+                mutation=uniform_mutation,
+                crossover_rate=0.45,
+                mutation_rate=0.9)
         elif algorithm_component == "FA":
-            algo = FireflyAlgorithm(population_size=hyperparameter_component[0], alpha=1.0, beta0=0.2, gamma=1.0)
+            algo = FireflyAlgorithm(
+                population_size=hyperparameter_component[0],
+                alpha=1.0,
+                beta0=0.2,
+                gamma=1.0)
         else:
             raise ValueError(f'Unsupported algorithm: {algorithm_component}')
 
@@ -122,12 +154,13 @@ class AutoARM(Problem):
             self.rules = problem.rules
 
             if self.logging:
-                print(f'Preprocessing: {preprocessing_component}'
-                      f' - Algorithm: {algorithm_component}'
-                      f' - Hyperparameters: {hyperparameter_component}'
-                      f' - Metrics: {metrics_component}\n'
-                      f'Fitness: {self.best_fitness:.4f}'
-                      f' - Mean Support: {self.rules.mean("support"):.4f}'
-                      f' - Mean Confidence: {self.rules.mean("confidence"):.4f}')
+                print(
+                    f'Preprocessing: {preprocessing_component}'
+                    f' - Algorithm: {algorithm_component}'
+                    f' - Hyperparameters: {hyperparameter_component}'
+                    f' - Metrics: {metrics_component}\n'
+                    f'Fitness: {self.best_fitness:.4f}'
+                    f' - Mean Support: {self.rules.mean("support"):.4f}'
+                    f' - Mean Confidence: {self.rules.mean("confidence"):.4f}')
 
         return fitness
