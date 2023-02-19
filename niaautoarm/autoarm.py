@@ -80,19 +80,16 @@ class AutoARM(Problem):
         self.best_fitness = -np.inf
 
     def _evaluate(self, sol):
-
-        # firstly, genotype to phenotype mapping
-        # print("Solution: ", sol)
+        # get components
         preprocessing_component = self.preprocessing[float_to_category(
             self.preprocessing, sol[0])]
-        # print("Izbrani preprocessing: ", preprocessing_component)
+
         algorithm_component = self.algorithms[float_to_category(
             self.algorithms, sol[1])]
-        # print("Izbrani algorithm: ", algorithm_component)
+
         hyperparameter_component = float_to_num(self.hyperparameters, sol[2:3])
-        # print("Izbrane vrednosti hyp:", hyperparameter_component)
+
         metrics_component = threshold(self.metrics, sol[4:10])
-        # print("Izbrane metrics", metrics_component)
 
         # perform data squashing if selected
 
@@ -148,6 +145,8 @@ class AutoARM(Problem):
             raise ValueError(f'Unsupported algorithm: {algorithm_component}')
 
         _, fitness = algo.run(task=task)
+
+        # store each pipeline in csv file for post-processing
 
         if fitness >= self.best_fitness:
             self.best_fitness = fitness
