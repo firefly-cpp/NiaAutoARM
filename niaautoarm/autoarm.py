@@ -6,7 +6,7 @@ from niapy.algorithms.basic import DifferentialEvolution, FireflyAlgorithm, Part
 from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
 from niapy.task import Task, OptimizationType
 from niaautoarm.utils import calculate_dimension_of_the_problem
-
+import csv
 
 def float_to_category(component, val):
     r"""Map float value to component (category). """
@@ -78,6 +78,15 @@ class AutoARM(Problem):
         self.logging = logging
         self.rules = None
         self.best_fitness = -np.inf
+
+        # for writing pipelines in excel file
+        self.all_pipelines = []
+
+    def dump_to_file(self):
+        with open("results.txt", 'w', newline='') as f:
+            writer = csv.writer(f)
+            for pip in self.pipelines:
+                writer.writerow([pip.preprocessing, pip.algorithm, pip.metrics])
 
     def _evaluate(self, sol):
         # get components

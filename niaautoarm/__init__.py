@@ -1,8 +1,6 @@
-from niaautoarm.preprocessing import FeatureSelection
 from niaautoarm.autoarm import AutoARM
 
 __all__ = [
-    "FeatureSelection",
     "AutoARM"
 ]
 
