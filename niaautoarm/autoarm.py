@@ -6,6 +6,8 @@ from niapy.algorithms.basic import DifferentialEvolution, FireflyAlgorithm, Part
 from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
 from niapy.task import Task, OptimizationType
 from niaautoarm.utils import calculate_dimension_of_the_problem
+
+from niaautoarm.preprocessing import z_score_normalization, min_max_scaling, discretization_equal_width, discretization_equal_frequency, discretization_kmeans, remove_highly_correlated_features
 import csv
 
 def float_to_category(component, val):
@@ -101,6 +103,15 @@ class AutoARM(Problem):
         metrics_component = threshold(self.metrics, sol[4:10])
 
         # perform data squashing if selected
+
+        print(self.dataset)
+        print(type(self.dataset))
+
+        #z_score_normalization(self.dataset)
+        print(remove_highly_correlated_features(self.dataset))
+        exit(1)
+
+        
 
         if preprocessing_component == "squash_euclidean":
             self.dataset = squash(
