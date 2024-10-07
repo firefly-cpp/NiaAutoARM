@@ -3,8 +3,5 @@ def calculate_dimension_of_the_problem(
         algorithms,
         hyperparameters,
         metrics):
-    return (
-        len(preprocessing) +
-        len(algorithms) +
-        len(hyperparameters) +
-        len(metrics))
+    return ( 2 + len(hyperparameters) + len(metrics))
+

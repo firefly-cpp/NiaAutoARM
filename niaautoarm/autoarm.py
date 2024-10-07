@@ -6,6 +6,7 @@ from niapy.algorithms.basic import DifferentialEvolution, FireflyAlgorithm, Part
 from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
 from niapy.task import Task, OptimizationType
 from niaautoarm.utils import calculate_dimension_of_the_problem
+from niaautoarm.pipeline import Pipeline
 
 from niaautoarm.preprocessing import z_score_normalization, min_max_scaling, discretization_equal_width, discretization_equal_frequency, discretization_kmeans, remove_highly_correlated_features
 import csv
@@ -21,10 +22,7 @@ def float_to_num(component, val):
     r"""Map float value to integer. """
     parameters = [1] * len(component)
     for i in range(len(component)):
-        parameters[i] = int(val *
-                            int(component[i]['max']) +
-                            int(component[i]['min']))
-
+        parameters[i] = int(int(component[i]['min'] + (int(component[i]['max']) - int(component[i]['min'])) * val[i]))
     return parameters
 
 
@@ -60,7 +58,7 @@ class AutoARM(Problem):
             algorithms,
             hyperparameters,
             metrics,
-            logging=False
+            logger
     ):
         r"""Initialize instance of AutoARM.
 
@@ -77,41 +75,37 @@ class AutoARM(Problem):
         self.algorithms = algorithms
         self.hyperparameters = hyperparameters
         self.metrics = metrics
-        self.logging = logging
         self.rules = None
-        self.best_fitness = -np.inf
+        self.best_fitness = -np.inf        
 
+        self.logger = logger
         # for writing pipelines in excel file
         self.all_pipelines = []
+        self.best_pipeline = None
 
-    def dump_to_file(self):
-        with open("results.txt", 'w', newline='') as f:
-            writer = csv.writer(f)
-            for pip in self.pipelines:
-                writer.writerow([pip.preprocessing, pip.algorithm, pip.metrics])
+    def get_best_pipeline(self):
+        self.best_pipeline
 
-    def _evaluate(self, sol):
-        # get components
+    def get_all_pipelines(self):
+        return self.all_pipelines
+
+    def _evaluate(self, x):
+        # get preprocessing components (just one)
         preprocessing_component = self.preprocessing[float_to_category(
-            self.preprocessing, sol[0])]
+            self.preprocessing, x[0])]
 
+        #get the algorithm component
         algorithm_component = self.algorithms[float_to_category(
-            self.algorithms, sol[1])]
+            self.algorithms, x[1])]
 
-        hyperparameter_component = float_to_num(self.hyperparameters, sol[2:3])
+        hyperparameter_component = float_to_num(self.hyperparameters, x[2:4])
 
-        metrics_component = threshold(self.metrics, sol[4:10])
+        metrics_component = threshold(self.metrics, x[4:])
 
-        # perform data squashing if selected
+        if metrics_component == ():  # if no metrics are selected
+            return -np.inf
 
-        print(self.dataset)
-        print(type(self.dataset))
-
-        #z_score_normalization(self.dataset)
-        print(remove_highly_correlated_features(self.dataset))
-        exit(1)
-
-        
+        # perform preprocessing        
 
         if preprocessing_component == "squash_euclidean":
             self.dataset = squash(
@@ -162,24 +156,25 @@ class AutoARM(Problem):
                 beta0=0.2,
                 gamma=1.0)
         else:
-            raise ValueError(f'Unsupported algorithm: {algorithm_component}')
+            raise ValueError(f'Unsupported algorithm: {algorithm_component}')        
 
         _, fitness = algo.run(task=task)
 
-        # store each pipeline in csv file for post-processing
+        if (len(problem.rules) == 0):
+            return -np.inf
 
+        pipeline = Pipeline(preprocessing_component, algorithm_component, metrics_component, hyperparameter_component, fitness, problem.rules)
+
+        # store each generated pipeline in csv file for post-processing
+        self.all_pipelines.append(pipeline)
+        
         if fitness >= self.best_fitness:
+
             self.best_fitness = fitness
             self.rules = problem.rules
+            self.best_pipeline = pipeline
 
-            if self.logging:
-                print(
-                    f'Preprocessing: {preprocessing_component}'
-                    f' - Algorithm: {algorithm_component}'
-                    f' - Hyperparameters: {hyperparameter_component}'
-                    f' - Metrics: {metrics_component}\n'
-                    f'Fitness: {self.best_fitness:.4f}'
-                    f' - Mean Support: {self.rules.mean("support"):.4f}'
-                    f' - Mean Confidence: {self.rules.mean("confidence"):.4f}')
+            if self.logger is not None:
+                self.logger.log_pipeline(pipeline)
 
         return fitness
