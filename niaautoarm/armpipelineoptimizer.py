@@ -4,6 +4,7 @@ from niaautoarm import AutoARM
 from niapy.task import Task, OptimizationType
 from niaautoarm.logger import Logger
 from niaautoarm.stats import ArmPipelineStatistics
+import pickle
 
 
 __all__ = ["ArmPipelineOptimizer"]
@@ -22,37 +23,37 @@ class ArmPipelineOptimizer:
     """
     
     def __init__(self, **kwargs):
-        self._data = None
-        self._feature_prepocessing_techniques = None
-        self._rule_mining_algorithms = None        
-        self._metrics = None
-        self._hyperparameters = None
-        self._logger = None
+        self.data = None
+        self.feature_prepocessing_techniques = None
+        self.rule_mining_algorithms = None        
+        self.metrics = None
+        self.hyperparameters = None
+        self.logger = None
 
         self._set_parameters(**kwargs)
 
     def _set_parameters(self, data, feature_prepocessing_techniques, rule_mining_algorithms, metrics, hyperparameters, log=True,log_verbose=False, log_output_file=None):
 
-        self._data = data
-        self._feature_prepocessing_techniques = feature_prepocessing_techniques        
-        self._rule_mining_algorithms = rule_mining_algorithms
-        self._metrics = metrics
-        self._hyperparameters = hyperparameters
+        self.data = data
+        self.feature_prepocessing_techniques = feature_prepocessing_techniques        
+        self.rule_mining_algorithms = rule_mining_algorithms
+        self.metrics = metrics
+        self.hyperparameters = hyperparameters
 
         if log is True:
-            self._logger = Logger(log_verbose, output_file=log_output_file)
+            self.logger = Logger(log_verbose, output_file=log_output_file)
 
     def get_data(self):
-        return self._data
+        return self.data
     
     def get_feature_prepocessing_techniques(self):
-        return self._feature_prepocessing_techniques
+        return self.feature_prepocessing_techniques
     
     def get_rule_mining_algorithms(self):
-        return self._rule_mining_algorithms
+        return self.rule_mining_algorithms
     
     def get_logger(self):
-        return self._logger
+        return self.logger    
     
     def run(self, population_size, optimization_algorithm, max_iters=10):
         
@@ -60,12 +61,12 @@ class ArmPipelineOptimizer:
         algo.NP = population_size
 
         problem = AutoARM(        
-            self._data,
-            self._feature_prepocessing_techniques,
-            self._rule_mining_algorithms,
-            self._hyperparameters,
-            self._metrics,
-            self._logger)
+            self.data,
+            self.feature_prepocessing_techniques,
+            self.rule_mining_algorithms,
+            self.hyperparameters,
+            self.metrics,
+            self.logger)
         
         task = Task(
             problem=problem,
@@ -75,8 +76,7 @@ class ArmPipelineOptimizer:
         best = algo.run(task=task)
         arm_best_pipeline = problem.get_best_pipeline()
         arm_stats = ArmPipelineStatistics(problem.get_all_pipelines(),arm_best_pipeline)
-        
-
-
+        with open("test.pickle", 'wb') as file:
+            pickle.dump(arm_stats, file)
 
         return arm_best_pipeline
