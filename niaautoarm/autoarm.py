@@ -1,15 +1,12 @@
 import numpy as np
 from niaarm import NiaARM
-from niaarm import Dataset, squash
 from niapy.problems import Problem
 from niapy.algorithms.basic import DifferentialEvolution, FireflyAlgorithm, ParticleSwarmAlgorithm, GeneticAlgorithm
 from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
 from niapy.task import Task, OptimizationType
-from niaautoarm.utils import calculate_dimension_of_the_problem
-from niaautoarm.pipeline import Pipeline
 
-from niaautoarm.preprocessing import z_score_normalization, min_max_scaling, discretization_equal_width, discretization_equal_frequency, discretization_kmeans, remove_highly_correlated_features
-import csv
+from niaautoarm.pipeline import Pipeline
+from niaautoarm.preprocessing_class import Preprocessing
 
 def float_to_category(component, val):
     r"""Map float value to component (category). """
@@ -30,6 +27,14 @@ def threshold(component, val):
     r"""Calculate whether feature is over a threshold. """
     selected = [c for i, c in enumerate(component) if val[i] > 0.5]
     return tuple(selected)
+
+def calculate_dimension_of_the_problem(
+        preprocessing,
+        algorithms,
+        hyperparameters,
+        metrics):
+    return ( 2 + len(hyperparameters) + len(metrics))
+
 
 
 class AutoARM(Problem):
@@ -60,7 +65,7 @@ class AutoARM(Problem):
             metrics,
             logger
     ):
-        r"""Initialize instance of AutoARM.
+        r"""Initialize instance of AutoARM.dataset_class
 
         Arguments:
 
@@ -70,16 +75,15 @@ class AutoARM(Problem):
             preprocessing, algorithms, hyperparameters, metrics)
 
         super().__init__(dimension, 0, 1)
-        self.dataset = dataset
         self.preprocessing = preprocessing
         self.algorithms = algorithms
         self.hyperparameters = hyperparameters
         self.metrics = metrics
-        self.rules = None
-        self.best_fitness = -np.inf        
+        self.best_fitness = -np.inf
+
+        self.preprocessing_instance = Preprocessing(dataset,None)
 
         self.logger = logger
-        # for writing pipelines in excel file
         self.all_pipelines = []
         self.best_pipeline = None
 
@@ -90,7 +94,7 @@ class AutoARM(Problem):
         return self.all_pipelines
 
     def _evaluate(self, x):
-        # get preprocessing components (just one)
+        # get preprocessing components (just one atm)
         preprocessing_component = self.preprocessing[float_to_category(
             self.preprocessing, x[0])]
 
@@ -102,11 +106,12 @@ class AutoARM(Problem):
 
         metrics_component = threshold(self.metrics, x[4:])
 
-        if metrics_component == ():  # if no metrics are selected
+        if metrics_component == ():  # if no metrics are selected TODO: check for alternative solution
             return -np.inf
 
-        # perform preprocessing        
-
+        # perform preprocessing
+        self.preprocessing_instance.set_preprocessing_algorithms(list(preprocessing_component)) #TODO can be a list of multiple preprocessing techniques, order is determined by importance in class
+        '''
         if preprocessing_component == "squash_euclidean":
             self.dataset = squash(
                 self.dataset,
@@ -117,12 +122,13 @@ class AutoARM(Problem):
                 self.dataset,
                 threshold=0.9,
                 similarity='cosine')
-
+        '''
         problem = NiaARM(
-            self.dataset.dimension,
-            self.dataset.features,
-            self.dataset.transactions,
+            self.preprocessing_instance.dataset.dimension,            
+            self.preprocessing_instance.dataset.features,
+            self.preprocessing_instance.dataset.transactions,
             metrics=metrics_component)
+        
 
         # build niapy task
         task = Task(
@@ -156,8 +162,8 @@ class AutoARM(Problem):
                 beta0=0.2,
                 gamma=1.0)
         else:
-            raise ValueError(f'Unsupported algorithm: {algorithm_component}')        
-
+            raise ValueError(f'Unsupported algorithm: {algorithm_component}')
+        
         _, fitness = algo.run(task=task)
 
         if (len(problem.rules) == 0):
@@ -165,13 +171,12 @@ class AutoARM(Problem):
 
         pipeline = Pipeline(preprocessing_component, algorithm_component, metrics_component, hyperparameter_component, fitness, problem.rules)
 
-        # store each generated pipeline in csv file for post-processing
+        # store each generated and valid pipeline in a list for post-processing
         self.all_pipelines.append(pipeline)
         
         if fitness >= self.best_fitness:
 
             self.best_fitness = fitness
-            self.rules = problem.rules
             self.best_pipeline = pipeline
 
             if self.logger is not None:
