@@ -4,7 +4,7 @@ from niapy.problems import Problem
 from niapy.task import Task, OptimizationType
 
 from niaautoarm.pipeline import Pipeline
-from niaautoarm.preprocessing_class import Preprocessing
+from niaautoarm.preprocessing import Preprocessing
 
 def float_to_category(component, val):
     r"""Map float value to component (category). """
@@ -34,7 +34,7 @@ def calculate_dimension_of_the_problem(
     return ( 2 + len(hyperparameters) + len(metrics))
 
 
-class AutoARM(Problem):
+class AutoARMProblem(Problem):
     r"""Definition of Auto Association Rule Mining.
 
     The implementation is composed of ideas found in the following papers:

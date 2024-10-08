@@ -1,4 +1,4 @@
-from niaautoarm.autoarm import AutoARM
+from niaautoarm.autoarmproblem import AutoARMProblem
 
 __all__ = [
     "AutoARM"

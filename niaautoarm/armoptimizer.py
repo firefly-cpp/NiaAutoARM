@@ -1,5 +1,5 @@
 from niapy.util.factory import get_algorithm
-from niaautoarm import AutoARM
+from niaautoarm.autoarmproblem import AutoARMProblem
 from niapy.task import Task, OptimizationType
 from niaautoarm.logger import Logger
 from niaautoarm.stats import ARMPipelineStatistics
@@ -8,7 +8,7 @@ import pickle
 
 __all__ = ["ArmPipelineOptimizer"]
 
-class ARMPipelineOptimizer:
+class AutoARMOptimizer:
     r"""Class for running the AutoARM framework.
 
     Date:
@@ -59,7 +59,7 @@ class ARMPipelineOptimizer:
         algo = get_algorithm(optimization_algorithm)
         algo.NP = population_size
 
-        problem = AutoARM(        
+        problem = AutoARMProblem(        
             self.data,
             self.feature_prepocessing_techniques,
             self.rule_mining_algorithms,

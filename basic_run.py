@@ -1,6 +1,6 @@
 # Description: This is a basic example of how to run the ARMPipelineOptimizer class.
 from niaarm.dataset import Dataset
-from niaautoarm.armpipelineoptimizer import ARMPipelineOptimizer
+from niaautoarm.armoptimizer import AutoARMOptimizer
 from niapy.algorithms.basic import ParticleSwarmOptimization, DifferentialEvolution, GeneticAlgorithm, FireflyAlgorithm
 from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
         "inclusion",
         "comprehensibility"]    
 
-    algo = ARMPipelineOptimizer(data=data, 
+    algo = AutoARMOptimizer(data=data, 
                                 feature_prepocessing_techniques=preprocessing,
                                 rule_mining_algorithms=algorithms, 
                                 metrics=metrics,
