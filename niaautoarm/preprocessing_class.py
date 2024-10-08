@@ -16,52 +16,58 @@ class Preprocessing:
 
 
     def __init__(self,dataset, prepocessing_algorithms : list, **kwargs):
-        self.dataset = dataset
+        self.dataset = dataset #Dataset object never changes
         self.preprocessing_algorithms = prepocessing_algorithms
-        self.preprocessed_dataset = None
 
         self._order = {'min_max_scaling': 1, 'z_score_normalization' : 1, 'squash_euclidean' : 1, 'squash_cosine' : 1,
                         'discretization_equal_width' : 3, 'discretization_equal_frequency' : 3, 'discretization_kmeans' : 3,
-                        'remove_highly_correlated_features' : 2}
+                        'remove_highly_correlated_features' : 2, 'none' : 4}
         
 
     def set_preprocessing_algorithms(self, preprocessing_algorithms):
-        self.preprocessing_algorithm = preprocessing_algorithms
+        self.preprocessing_algorithms = preprocessing_algorithms
 
     def get_preprocessing_algorithms(self):
         return self.preprocessing_algorithms    
     
-    def apply_preprocessing(self):
-        if self.preprocessed_dataset == None:
-            dataset = self.dataset
-        else:
-            dataset = self.preprocessed_dataset
-
+    def apply_preprocessing(self):   
+        dataset = self.dataset
         self._reorder_preprocessing_algorithms()
 
         for preprocessing_algorithm in self.preprocessing_algorithms:
-            print('Applying preprocessing algorithm: {}'.format(preprocessing_algorithm))
-            dataset = self._apply_preprocessing_algorithm(dataset)
+            dataset = Dataset(self._apply_preprocessing_algorithm(preprocessing_algorithm,dataset))
 
-        return Dataset(dataset.transactions)
+        return dataset
 
-    def _apply_preprocessing_algorithm(self, dataset):
-        if self.preprocessing_algorithm == 'min_max_scaling':
+
+    def _apply_preprocessing_algorithm(self, preprocessing_algorithm, dataset):
+        if preprocessing_algorithm == 'min_max_scaling':
             return self._min_max_scaling(dataset)
-        elif self.preprocessing_algorithm == 'z_score_normalization':
+        
+        elif preprocessing_algorithm == 'z_score_normalization':
             return self._z_score_normalization(dataset)
-        elif self.preprocessing_algorithm == 'discretization_equal_width':
+        
+        elif preprocessing_algorithm == 'discretization_equal_width':
             return self._discretization_equal_width(dataset)
-        elif self.preprocessing_algorithm == 'squash_euclidean':
-            return self.squash(dataset, threshold=0.9, similarity='euclidean')
-        elif self.preprocessing_algorithm == 'squash_cosine':
+        
+        elif preprocessing_algorithm == 'squash_euclidean':
+            return self.squash(dataset, threshold=0.9, similarity='euclidean') #Very slow, need to optimize !!!
+        
+        elif preprocessing_algorithm == 'squash_cosine':
             return self.squash(dataset, threshold=0.9, similarity='cosine')
-        elif self.preprocessing_algorithm == 'discretization_equal_frequency':
+        
+        elif preprocessing_algorithm == 'discretization_equal_frequency':
             return self.discretization_equal_frequency(dataset,q=5)
-        elif self.preprocessing_algorithm == 'discretization_kmeans':
+        
+        elif preprocessing_algorithm == 'discretization_kmeans':
             return self.discretization_kmeans(dataset,n_clusters=4)
-        elif self.preprocessing_algorithm == 'remove_highly_correlated_features':
+        
+        elif preprocessing_algorithm == 'remove_highly_correlated_features':
             return self.remove_highly_correlated_features(dataset,threshold=0.95)
+        
+        elif preprocessing_algorithm == 'none':
+            return dataset.transactions
+        
         else:
             raise ValueError('Unknown preprocessing algorithm: {}'.format(self.preprocessing_algorithm))
         
@@ -144,7 +150,7 @@ class Preprocessing:
         transactions = dataset.transactions
         transactions_dummies = pd.get_dummies(dataset.transactions).to_numpy()
         num_transactions = len(transactions)
-
+    
         squashed = np.zeros(num_transactions, dtype=bool)
         squashed_transactions = pd.DataFrame(columns=transactions.columns, dtype=int)
 
@@ -160,6 +166,7 @@ class Preprocessing:
                     continue
                 if similarity == 'euclidean':
                     distance = self._euclidean(transactions.iloc[pos], transactions.iloc[i], dataset.features)
+                    
                 else:
                     distance = self._cosine_similarity(transactions_dummies[pos], transactions_dummies[i])
 

@@ -1,10 +1,11 @@
 import csv
 
-class ArmPipelineStatistics:
-    def __init__(self, all_pipelines,best_pipeline):
+
+class ARMPipelineStatistics:
+    def __init__(self, all_pipelines, best_pipeline):
         self.pipelines = all_pipelines
         self.best_pipeline = best_pipeline
-        
+
 
     def dump_to_file(self):
         with open("results.txt", 'w', newline='') as f:

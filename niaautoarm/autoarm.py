@@ -1,5 +1,5 @@
 import numpy as np
-from niaarm import NiaARM
+from niaarm import NiaARM, squash
 from niapy.problems import Problem
 from niapy.algorithms.basic import DifferentialEvolution, FireflyAlgorithm, ParticleSwarmAlgorithm, GeneticAlgorithm
 from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
@@ -34,7 +34,6 @@ def calculate_dimension_of_the_problem(
         hyperparameters,
         metrics):
     return ( 2 + len(hyperparameters) + len(metrics))
-
 
 
 class AutoARM(Problem):
@@ -80,7 +79,6 @@ class AutoARM(Problem):
         self.hyperparameters = hyperparameters
         self.metrics = metrics
         self.best_fitness = -np.inf
-
         self.preprocessing_instance = Preprocessing(dataset,None)
 
         self.logger = logger
@@ -88,7 +86,7 @@ class AutoARM(Problem):
         self.best_pipeline = None
 
     def get_best_pipeline(self):
-        self.best_pipeline
+        return self.best_pipeline
 
     def get_all_pipelines(self):
         return self.all_pipelines
@@ -109,26 +107,14 @@ class AutoARM(Problem):
         if metrics_component == ():  # if no metrics are selected TODO: check for alternative solution
             return -np.inf
 
-        # perform preprocessing
-        self.preprocessing_instance.set_preprocessing_algorithms(list(preprocessing_component)) #TODO can be a list of multiple preprocessing techniques, order is determined by importance in class
-        '''
-        if preprocessing_component == "squash_euclidean":
-            self.dataset = squash(
-                self.dataset,
-                threshold=0.9,
-                similarity='euclidean')
-        elif preprocessing_component == "squash_cosine":
-            self.dataset = squash(
-                self.dataset,
-                threshold=0.9,
-                similarity='cosine')
-        '''
+        self.preprocessing_instance.set_preprocessing_algorithms([preprocessing_component]) #TODO can be a list of multiple preprocessing techniques, order is determined by importance in class
+        dataset = self.preprocessing_instance.apply_preprocessing()
+
         problem = NiaARM(
-            self.preprocessing_instance.dataset.dimension,            
-            self.preprocessing_instance.dataset.features,
-            self.preprocessing_instance.dataset.transactions,
-            metrics=metrics_component)
-        
+            dataset.dimension,            
+            dataset.features,
+            dataset.transactions,
+            metrics=metrics_component)        
 
         # build niapy task
         task = Task(
@@ -181,5 +167,6 @@ class AutoARM(Problem):
 
             if self.logger is not None:
                 self.logger.log_pipeline(pipeline)
-
+        else:
+            print("Fitness: ", fitness)
         return fitness

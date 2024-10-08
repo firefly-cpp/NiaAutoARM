@@ -1,15 +1,14 @@
-#from niaarm.logger import Logger
 from niapy.util.factory import get_algorithm
 from niaautoarm import AutoARM
 from niapy.task import Task, OptimizationType
 from niaautoarm.logger import Logger
-from niaautoarm.stats import ArmPipelineStatistics
+from niaautoarm.stats import ARMPipelineStatistics
 import pickle
 
 
 __all__ = ["ArmPipelineOptimizer"]
 
-class ArmPipelineOptimizer:
+class ARMPipelineOptimizer:
     r"""Class for running the AutoARM framework.
 
     Date:
@@ -55,7 +54,7 @@ class ArmPipelineOptimizer:
     def get_logger(self):
         return self.logger    
     
-    def run(self, population_size, optimization_algorithm, max_iters=10):
+    def run(self, optimization_algorithm, population_size=5, max_iters=10,output_pipeline_file=None):
         
         algo = get_algorithm(optimization_algorithm)
         algo.NP = population_size
@@ -75,8 +74,10 @@ class ArmPipelineOptimizer:
         
         best = algo.run(task=task)
         arm_best_pipeline = problem.get_best_pipeline()
-        arm_stats = ArmPipelineStatistics(problem.get_all_pipelines(),arm_best_pipeline)
-        with open("test.pickle", 'wb') as file:
-            pickle.dump(arm_stats, file)
+        arm_stats = ARMPipelineStatistics(problem.get_all_pipelines(),arm_best_pipeline)
+
+        if output_pipeline_file is not None:
+            with open(output_pipeline_file, 'wb') as file_handle: 
+                pickle.dump(arm_stats, file_handle)
 
         return arm_best_pipeline

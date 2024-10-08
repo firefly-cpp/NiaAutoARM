@@ -1,7 +1,6 @@
-from niaautoarm import AutoARM
+# Description: This is a basic example of how to run the ARMPipelineOptimizer class.
 from niaarm.dataset import Dataset
-from niapy.task import Task, OptimizationType
-from niaautoarm.armpipelineoptimizer import ArmPipelineOptimizer
+from niaautoarm.armpipelineoptimizer import ARMPipelineOptimizer
 
 if __name__ == "__main__":        
 
@@ -10,7 +9,7 @@ if __name__ == "__main__":
 
     # define which preprocessing methods to use
     # data squashing is now supported
-    preprocessing = ["squash_euclid", "squash_cosine", "none"]
+    preprocessing = ["min_max_scaling", "squash_cosine", "none"]
 
     # define algorithms for searching the association rules
     algorithms = ["PSO", "DE", "GA", "FA"]
@@ -39,7 +38,7 @@ if __name__ == "__main__":
         "inclusion",
         "comprehensibility"]    
 
-    algo = ArmPipelineOptimizer(data=data, 
+    algo = ARMPipelineOptimizer(data=data, 
                                 feature_prepocessing_techniques=preprocessing,
                                 rule_mining_algorithms=algorithms, metrics=metrics,
                                 hyperparameters=hyperparameters,
@@ -47,4 +46,5 @@ if __name__ == "__main__":
                                 log_verbose=True,
                                 log_output_file=None
                                 )
-    algo.run(5, "ParticleSwarmAlgorithm",max_iters=2)
+    
+    algo.run(optimization_algorithm="ParticleSwarmAlgorithm",population_size=5,max_iters=2,output_pipeline_file="results.pckl")
