@@ -1,8 +1,6 @@
 import numpy as np
 from niaarm import NiaARM, squash
 from niapy.problems import Problem
-from niapy.algorithms.basic import DifferentialEvolution, FireflyAlgorithm, ParticleSwarmAlgorithm, GeneticAlgorithm
-from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
 from niapy.task import Task, OptimizationType
 
 from niaautoarm.pipeline import Pipeline
@@ -122,40 +120,14 @@ class AutoARM(Problem):
             max_evals=hyperparameter_component[1],
             optimization_type=OptimizationType.MAXIMIZATION)
 
-        # see full list of available algorithms:
-        # https://github.com/NiaOrg/NiaPy/blob/master/Algorithms.md
-        if algorithm_component == "DE":
-            algo = DifferentialEvolution(
-                population_size=hyperparameter_component[0],
-                differential_weight=0.5,
-                crossover_probability=0.9)
-        elif algorithm_component == "PSO":
-            algo = ParticleSwarmAlgorithm(
-                population_size=hyperparameter_component[0],
-                min_velocity=-4.0,
-                max_velocity=4.0)
-        elif algorithm_component == "GA":
-            algo = GeneticAlgorithm(
-                population_size=hyperparameter_component[0],
-                crossover=uniform_crossover,
-                mutation=uniform_mutation,
-                crossover_rate=0.45,
-                mutation_rate=0.9)
-        elif algorithm_component == "FA":
-            algo = FireflyAlgorithm(
-                population_size=hyperparameter_component[0],
-                alpha=1.0,
-                beta0=0.2,
-                gamma=1.0)
-        else:
-            raise ValueError(f'Unsupported algorithm: {algorithm_component}')
+        algorithm_component.NP = hyperparameter_component[0]
         
-        _, fitness = algo.run(task=task)
+        _, fitness = algorithm_component.run(task=task)
 
         if (len(problem.rules) == 0):
             return -np.inf
 
-        pipeline = Pipeline(preprocessing_component, algorithm_component, metrics_component, hyperparameter_component, fitness, problem.rules)
+        pipeline = Pipeline(preprocessing_component, algorithm_component.Name[1], metrics_component, hyperparameter_component, fitness, problem.rules)
 
         # store each generated and valid pipeline in a list for post-processing
         self.all_pipelines.append(pipeline)

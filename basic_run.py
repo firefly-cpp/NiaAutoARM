@@ -1,6 +1,8 @@
 # Description: This is a basic example of how to run the ARMPipelineOptimizer class.
 from niaarm.dataset import Dataset
 from niaautoarm.armpipelineoptimizer import ARMPipelineOptimizer
+from niapy.algorithms.basic import ParticleSwarmOptimization, DifferentialEvolution, GeneticAlgorithm, FireflyAlgorithm
+from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
 
 if __name__ == "__main__":        
 
@@ -12,7 +14,10 @@ if __name__ == "__main__":
     preprocessing = ["min_max_scaling", "squash_cosine", "none"]
 
     # define algorithms for searching the association rules
-    algorithms = ["PSO", "DE", "GA", "FA"]
+    algorithms = [ParticleSwarmOptimization(min_velocity=-4, max_velocity=4),
+                    DifferentialEvolution(crossover_probability=0.9, differential_weight=0.5),
+                    GeneticAlgorithm(crossover=uniform_crossover, mutation=uniform_mutation, crossover_rate=0.9, mutation_rate=0.1), 
+                    FireflyAlgorithm(alpha=1.0, beta0=0.2, gamma=1.0)]
 
     # define hyperparameters and their min/max values
     hyperparameter1 = {
@@ -40,7 +45,8 @@ if __name__ == "__main__":
 
     algo = ARMPipelineOptimizer(data=data, 
                                 feature_prepocessing_techniques=preprocessing,
-                                rule_mining_algorithms=algorithms, metrics=metrics,
+                                rule_mining_algorithms=algorithms, 
+                                metrics=metrics,
                                 hyperparameters=hyperparameters,
                                 log=True,
                                 log_verbose=True,
