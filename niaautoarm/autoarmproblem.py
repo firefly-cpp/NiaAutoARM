@@ -1,37 +1,12 @@
 import numpy as np
-from niaarm import NiaARM, squash
+from niaarm import NiaARM
 from niapy.problems import Problem
 from niapy.task import Task, OptimizationType
 
 from niaautoarm.pipeline import Pipeline
 from niaautoarm.preprocessing import Preprocessing
 
-def float_to_category(component, val):
-    r"""Map float value to component (category). """
-    if val == 1:
-        return len(component) - 1
-    return int(val * len(component))
-
-
-def float_to_num(component, val):
-    r"""Map float value to integer. """
-    parameters = [1] * len(component)
-    for i in range(len(component)):
-        parameters[i] = int(int(component[i]['min'] + (int(component[i]['max']) - int(component[i]['min'])) * val[i]))
-    return parameters
-
-
-def threshold(component, val):
-    r"""Calculate whether feature is over a threshold. """
-    selected = [c for i, c in enumerate(component) if val[i] > 0.5]
-    return tuple(selected)
-
-def calculate_dimension_of_the_problem(
-        preprocessing,
-        algorithms,
-        hyperparameters,
-        metrics):
-    return ( 2 + len(hyperparameters) + len(metrics))
+from niaautoarm.utils import calculate_dimension_of_the_problem, float_to_category, float_to_num, threshold
 
 
 class AutoARMProblem(Problem):
@@ -56,10 +31,12 @@ class AutoARMProblem(Problem):
     def __init__(
             self,
             dataset,
-            preprocessing,
+            preprocessing_methods,
             algorithms,
             hyperparameters,
             metrics,
+            optimize_metric_weights,
+            allow_multiple_preprocessing,
             logger
     ):
         r"""Initialize instance of AutoARM.dataset_class
@@ -69,10 +46,10 @@ class AutoARMProblem(Problem):
         """
         # calculate the dimension of the problem
         dimension = calculate_dimension_of_the_problem(
-            preprocessing, algorithms, hyperparameters, metrics)
+            preprocessing_methods, hyperparameters, metrics, optimize_metric_weights=optimize_metric_weights, allow_multiple_preprocessing=allow_multiple_preprocessing)
 
         super().__init__(dimension, 0, 1)
-        self.preprocessing = preprocessing
+        self.preprocessing_methods = preprocessing_methods
         self.algorithms = algorithms
         self.hyperparameters = hyperparameters
         self.metrics = metrics
@@ -83,6 +60,9 @@ class AutoARMProblem(Problem):
         self.all_pipelines = []
         self.best_pipeline = None
 
+        self.allow_multiple_preprocessing = allow_multiple_preprocessing
+        self.optimize_metric_weights = optimize_metric_weights
+
     def get_best_pipeline(self):
         return self.best_pipeline
 
@@ -90,22 +70,44 @@ class AutoARMProblem(Problem):
         return self.all_pipelines
 
     def _evaluate(self, x):
-        # get preprocessing components (just one atm)
-        preprocessing_component = self.preprocessing[float_to_category(
-            self.preprocessing, x[0])]
+        r"""Evaluate the fitness of the pipeline.
+        """
 
         #get the algorithm component
         algorithm_component = self.algorithms[float_to_category(
-            self.algorithms, x[1])]
+            self.algorithms, x[0])]
+        
+        pos_x = 1
+        
+        hyperparameter_component = float_to_num(self.hyperparameters, x[pos_x:pos_x + len(self.hyperparameters)])
 
-        hyperparameter_component = float_to_num(self.hyperparameters, x[2:4])
+        pos_x += len(self.hyperparameters)
+        
+        # get preprocessing components
+        if self.allow_multiple_preprocessing:
+            preprocessing_component = threshold(self.preprocessing_methods, x[pos_x:pos_x + len(self.preprocessing_methods)])
+            pos_x += len(self.preprocessing_methods)
+        else:
+            preprocessing_component = [self.preprocessing_methods[float_to_category(
+            self.preprocessing_methods, x[pos_x])]]
+            pos_x += 1        
 
-        metrics_component = threshold(self.metrics, x[4:])
+        
+        metrics_indexes ,metrics_component = threshold(self.metrics, x[pos_x:pos_x + len(self.metrics)])
 
         if metrics_component == ():  # if no metrics are selected TODO: check for alternative solution
             return -np.inf
 
-        self.preprocessing_instance.set_preprocessing_algorithms([preprocessing_component]) #TODO can be a list of multiple preprocessing techniques, order is determined by importance in class
+        pos_x += len(self.metrics)
+
+        if self.optimize_metric_weights:
+            metrics_weights = x[pos_x:]
+            metrics_weights = [metrics_weights[i] for i in metrics_indexes]
+            metrics_component = dict(zip(metrics_component, metrics_weights))
+
+
+
+        self.preprocessing_instance.set_preprocessing_algorithms(preprocessing_component) #TODO can be a list of multiple preprocessing techniques, order is determined by importance in class Preprocessing
         dataset = self.preprocessing_instance.apply_preprocessing()
 
         problem = NiaARM(
@@ -129,7 +131,7 @@ class AutoARMProblem(Problem):
 
         pipeline = Pipeline(preprocessing_component, algorithm_component.Name[1], metrics_component, hyperparameter_component, fitness, problem.rules)
 
-        # store each generated and valid pipeline in a list for post-processing
+        # store each generated and also valid pipeline in a list for post-processing
         self.all_pipelines.append(pipeline)
         
         if fitness >= self.best_fitness:
@@ -140,5 +142,5 @@ class AutoARMProblem(Problem):
             if self.logger is not None:
                 self.logger.log_pipeline(pipeline)
         else:
-            print("Fitness: ", fitness)
+            print("Fitness: ", fitness) # For debugging purposes, remove later
         return fitness

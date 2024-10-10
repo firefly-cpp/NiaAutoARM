@@ -3,8 +3,6 @@ from niaautoarm.autoarmproblem import AutoARMProblem
 from niapy.task import Task, OptimizationType
 from niaautoarm.logger import Logger
 from niaautoarm.stats import ARMPipelineStatistics
-import pickle
-
 
 __all__ = ["ArmPipelineOptimizer"]
 
@@ -15,7 +13,7 @@ class AutoARMOptimizer:
         2024
 
     Author:
-        Uroš Mlakar
+        Uroš Mlakar & Iztok Fister Jr.
 
     License:
         MIT
@@ -54,7 +52,14 @@ class AutoARMOptimizer:
     def get_logger(self):
         return self.logger    
     
-    def run(self, optimization_algorithm, population_size=5, max_iters=10,output_pipeline_file=None):
+    def run(
+            self,
+            optimization_algorithm,
+            population_size=5, 
+            max_iters=10,
+            optimize_metric_weights=False,
+            allow_multiple_preprocessing=False,
+            output_pipeline_file=None):
         
         algo = get_algorithm(optimization_algorithm)
         algo.NP = population_size
@@ -65,6 +70,8 @@ class AutoARMOptimizer:
             self.rule_mining_algorithms,
             self.hyperparameters,
             self.metrics,
+            optimize_metric_weights,
+            allow_multiple_preprocessing,
             self.logger)
         
         task = Task(
@@ -75,9 +82,8 @@ class AutoARMOptimizer:
         best = algo.run(task=task)
         arm_best_pipeline = problem.get_best_pipeline()
         arm_stats = ARMPipelineStatistics(problem.get_all_pipelines(),arm_best_pipeline)
-
+        
         if output_pipeline_file is not None:
-            with open(output_pipeline_file, 'wb') as file_handle: 
-                pickle.dump(arm_stats, file_handle)
+            arm_stats.dump_to_file(output_pipeline_file)
 
         return arm_best_pipeline

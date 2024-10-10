@@ -1,5 +1,5 @@
 import csv
-
+import pickle
 
 class ARMPipelineStatistics:
     def __init__(self, all_pipelines, best_pipeline):
@@ -7,11 +7,9 @@ class ARMPipelineStatistics:
         self.best_pipeline = best_pipeline
 
 
-    def dump_to_file(self):
-        with open("results.txt", 'w', newline='') as f:
-            writer = csv.writer(f)
-            for pip in self.pipelines:
-                writer.writerow([pip.preprocessing, pip.algorithm, pip.metrics, pip.parameters, pip.fitness, pip.support, pip.confidence, pip.num_rules])
+    def dump_to_file(self, output_pipeline_file):
+        with open(output_pipeline_file, 'wb') as file:
+            pickle.dump(self, file)
 
     def _calculate_most_frequent_preprocessing_technique(self):
         return max(set([pip.preprocessing for pip in self.pipelines]), key=[pip.preprocessing for pip in self.pipelines].count)

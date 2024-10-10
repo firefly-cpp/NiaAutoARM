@@ -1,7 +1,7 @@
 from niaarm.dataset import Dataset
 import pandas as pd
 from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, PowerTransformer
 import numpy as np
 from pandas.api.types import is_float_dtype, is_integer_dtype
 
@@ -10,13 +10,12 @@ class Preprocessing:
 
     Attributes:
         dataset (Dataset): The dataset to be preprocessed.
-        preprocessing_algorithm (str): The preprocessing algorithm to be used.
-        preprocessed_dataset (Dataset): The preprocessed dataset.
+        preprocessing_algorithms (list): List of preprocessing algorithms to be used.
     """
 
 
     def __init__(self,dataset, prepocessing_algorithms : list, **kwargs):
-        self.dataset = dataset #Dataset object never changes
+        self.dataset = dataset
         self.preprocessing_algorithms = prepocessing_algorithms
 
         self._order = {'min_max_scaling': 1, 'z_score_normalization' : 1, 'squash_euclidean' : 1, 'squash_cosine' : 1,
@@ -65,6 +64,9 @@ class Preprocessing:
         elif preprocessing_algorithm == 'remove_highly_correlated_features':
             return self.remove_highly_correlated_features(dataset,threshold=0.95)
         
+        elif preprocessing_algorithm == 'yeo_johnson':
+            return self.yeo_johnson(dataset)
+        
         elif preprocessing_algorithm == 'none':
             return dataset.transactions
         
@@ -107,6 +109,18 @@ class Preprocessing:
                 discretized_transactions[head] = pd.cut(dataset.transactions[head], bins=bins, labels=False)
 
         return discretized_transactions
+    
+    def yeo_johnson(self,dataset):
+        '''Apply Yeo-Johnson transformation to the dataset'''
+
+        transformed_transactions = dataset.transactions.copy()
+        transformer = PowerTransformer()
+
+        for head in dataset.header:
+            if dataset.transactions[head].dtype == 'float':
+                transformed_transactions[head] = transformer.fit_transform(dataset.transactions[head].values.reshape(-1, 1))
+
+        return transformed_transactions
     
     def _euclidean(self,u, v, features):
         dist = 0

@@ -10,7 +10,6 @@ if __name__ == "__main__":
     data = Dataset("datasets/Abalone.csv")
 
     # define which preprocessing methods to use
-    # data squashing is now supported
     preprocessing = ["min_max_scaling", "squash_cosine", "none"]
 
     # define algorithms for searching the association rules
@@ -43,7 +42,7 @@ if __name__ == "__main__":
         "inclusion",
         "comprehensibility"]    
 
-    algo = AutoARMOptimizer(data=data, 
+    pipeline_optimizer = AutoARMOptimizer(data=data, 
                                 feature_prepocessing_techniques=preprocessing,
                                 rule_mining_algorithms=algorithms, 
                                 metrics=metrics,
@@ -53,4 +52,10 @@ if __name__ == "__main__":
                                 log_output_file=None
                                 )
     
-    algo.run(optimization_algorithm="ParticleSwarmAlgorithm",population_size=5,max_iters=2,output_pipeline_file="results.pckl")
+    pipeline_optimizer.run(
+        optimization_algorithm="ParticleSwarmAlgorithm",
+        population_size=5,
+        max_iters=2,
+        optimize_metric_weights=True,
+        allow_multiple_preprocessing=False,
+        output_pipeline_file="results.pckl")
