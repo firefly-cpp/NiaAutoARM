@@ -21,14 +21,14 @@ if __name__ == "__main__":
     # define hyperparameters and their min/max values
     hyperparameter1 = {
         "parameter": "NP",
-        "min": 5,
-        "max": 15
+        "min": 10,
+        "max": 30
     }
 
     hyperparameter2 = {
         "parameter": "N_FES",
-        "min": 1000,
-        "max": 2000
+        "min": 2000,
+        "max": 10000
     }
     # create array
     hyperparameters = [hyperparameter1, hyperparameter2]
@@ -54,8 +54,8 @@ if __name__ == "__main__":
     
     pipeline_optimizer.run(
         optimization_algorithm="ParticleSwarmAlgorithm",
-        population_size=5,
-        max_iters=2,
+        population_size=30,
+        max_evals=100,
         optimize_metric_weights=True,
         allow_multiple_preprocessing=False,
         output_pipeline_file="results.pckl")

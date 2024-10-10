@@ -56,7 +56,7 @@ class AutoARMOptimizer:
             self,
             optimization_algorithm,
             population_size=5, 
-            max_iters=10,
+            max_evals=1000,
             optimize_metric_weights=False,
             allow_multiple_preprocessing=False,
             output_pipeline_file=None):
@@ -76,7 +76,7 @@ class AutoARMOptimizer:
         
         task = Task(
             problem=problem,
-            max_iters=max_iters,
+            max_evals=max_evals,
             optimization_type=OptimizationType.MAXIMIZATION)
         
         best = algo.run(task=task)
