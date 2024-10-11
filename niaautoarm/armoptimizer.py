@@ -27,9 +27,9 @@ class AutoARMOptimizer:
         self.hyperparameters = None
         self.logger = None
 
-        self._set_parameters(**kwargs)
+        self.set_parameters(**kwargs)
 
-    def _set_parameters(self, data, feature_prepocessing_techniques, rule_mining_algorithms, metrics, hyperparameters, log=True,log_verbose=False, log_output_file=None):
+    def set_parameters(self, data, feature_prepocessing_techniques, rule_mining_algorithms, metrics, hyperparameters, log=True,log_verbose=False, log_output_file=None):
 
         self.data = data
         self.feature_prepocessing_techniques = feature_prepocessing_techniques        
@@ -59,8 +59,19 @@ class AutoARMOptimizer:
             max_evals=1000,
             optimize_metric_weights=False,
             allow_multiple_preprocessing=False,
+            use_surrogate_fitness=False,
             output_pipeline_file=None):
-        
+        r"""Run the AutoARM framework.
+        Parameters:
+            optimization_algorithm (str): Optimization algorithm.
+            population_size (int): Population size.
+            max_evals (int): Maximum number of function evaluations.
+            optimize_metric_weights (bool): Optimize metric weights.
+            allow_multiple_preprocessing (bool): Allow multiple preprocessing algorithms.
+            use_surrogate_fitness (bool): Use surrogate fitness. Uses the mean of the metrics as the fitness for all pipelines.
+            output_pipeline_file (str): Output pipeline file for post processing
+        """
+
         algo = get_algorithm(optimization_algorithm)
         algo.NP = population_size
 
@@ -72,6 +83,7 @@ class AutoARMOptimizer:
             self.metrics,
             optimize_metric_weights,
             allow_multiple_preprocessing,
+            use_surrogate_fitness,
             self.logger)
         
         task = Task(

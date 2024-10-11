@@ -14,13 +14,14 @@ class Preprocessing:
     """
 
 
-    def __init__(self,dataset, prepocessing_algorithms : list, **kwargs):
+    def __init__(self,dataset, prepocessing_algorithms : list):
         self.dataset = dataset
         self.preprocessing_algorithms = prepocessing_algorithms
 
-        self._order = {'min_max_scaling': 1, 'z_score_normalization' : 1, 'squash_euclidean' : 1, 'squash_cosine' : 1,
+        self._order = {'min_max_scaling': 1, 'z_score_normalization' : 1, 'squash_euclidean' : 1, 'squash_cosine' : 1, 'yeo_johnson' : 1,
+                        'remove_highly_correlated_features' : 2,
                         'discretization_equal_width' : 3, 'discretization_equal_frequency' : 3, 'discretization_kmeans' : 3,
-                        'remove_highly_correlated_features' : 2, 'none' : 4}
+                        'none' : 4} #TODO : Use just one of the numbered values for each rank
         
 
     def set_preprocessing_algorithms(self, preprocessing_algorithms):
@@ -50,6 +51,7 @@ class Preprocessing:
             return self._discretization_equal_width(dataset)
         
         elif preprocessing_algorithm == 'squash_euclidean':
+            Warning('This method is very slow, need to optimize !!!')
             return self.squash(dataset, threshold=0.9, similarity='euclidean') #Very slow, need to optimize !!!
         
         elif preprocessing_algorithm == 'squash_cosine':

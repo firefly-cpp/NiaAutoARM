@@ -4,7 +4,12 @@ from niaautoarm.armoptimizer import AutoARMOptimizer
 from niapy.algorithms.basic import ParticleSwarmOptimization, DifferentialEvolution, GeneticAlgorithm, FireflyAlgorithm
 from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
 
-if __name__ == "__main__":        
+import random as rnd
+import numpy as np
+if __name__ == "__main__":
+       
+    rnd.seed(1234)
+    np.random.seed(1234)
 
     # load dataset from csv
     data = Dataset("datasets/Abalone.csv")
@@ -54,8 +59,9 @@ if __name__ == "__main__":
     
     pipeline_optimizer.run(
         optimization_algorithm="ParticleSwarmAlgorithm",
-        population_size=30,
+        population_size=10,
         max_evals=100,
         optimize_metric_weights=True,
         allow_multiple_preprocessing=False,
+        use_surrogate_fitness=True,
         output_pipeline_file="results.pckl")

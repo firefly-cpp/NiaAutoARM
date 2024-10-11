@@ -15,8 +15,6 @@ def float_to_num(component, val):
 
 def threshold(component, val):
     r"""Calculate whether feature is over a threshold. """
-    print(component)
-    print(val)
     data = [(i,c) for i, c in enumerate(component) if val[i] > 0.5]
     if data:
         return zip(*data)

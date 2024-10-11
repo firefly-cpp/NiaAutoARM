@@ -19,13 +19,14 @@ class AutoARMProblem(Problem):
 
     Args:
         dataset (list): The entire dataset.
-        preprocessing (list): Preprocessing components (data squashing or none).
+        preprocessing_methods (list): Preprocessing components (see Prepprocessing class).
         algorithms (list): Algorithm components (one arbitrary algorithm from niapy collection).
         hyperparameters (list): Selected hyperparameter values.
         metrics (list): Metrics component.
+        optimize_metric_weights
+        allow_multiple_preprocessing
+        use_surrogate_fitness
         logging (bool): Enable logging of fitness improvements. Default: ``False``.
-    Attributes:
-        rules (RuleList): A list of mined association rules.
     """
 
     def __init__(
@@ -37,6 +38,7 @@ class AutoARMProblem(Problem):
             metrics,
             optimize_metric_weights,
             allow_multiple_preprocessing,
+            use_surrogate_fitness,
             logger
     ):
         r"""Initialize instance of AutoARM.dataset_class
@@ -62,6 +64,7 @@ class AutoARMProblem(Problem):
 
         self.allow_multiple_preprocessing = allow_multiple_preprocessing
         self.optimize_metric_weights = optimize_metric_weights
+        self.use_surrogate_fitness = use_surrogate_fitness
 
     def get_best_pipeline(self):
         return self.best_pipeline
@@ -90,9 +93,8 @@ class AutoARMProblem(Problem):
         else:
             preprocessing_component = [self.preprocessing_methods[float_to_category(
             self.preprocessing_methods, x[pos_x])]]
-            pos_x += 1        
+            pos_x += 1       
 
-        
         metrics_indexes ,metrics_component = threshold(self.metrics, x[pos_x:pos_x + len(self.metrics)])
 
         if metrics_component == ():  # if no metrics are selected TODO: check for alternative solution
@@ -105,9 +107,7 @@ class AutoARMProblem(Problem):
             metrics_weights = [metrics_weights[i] for i in metrics_indexes]
             metrics_component = dict(zip(metrics_component, metrics_weights))
 
-
-
-        self.preprocessing_instance.set_preprocessing_algorithms(preprocessing_component) #TODO can be a list of multiple preprocessing techniques, order is determined by importance in class Preprocessing
+        self.preprocessing_instance.set_preprocessing_algorithms(preprocessing_component)
         dataset = self.preprocessing_instance.apply_preprocessing()
 
         problem = NiaARM(
@@ -130,11 +130,14 @@ class AutoARMProblem(Problem):
             return -np.inf
 
         pipeline = Pipeline(preprocessing_component, algorithm_component.Name[1], metrics_component, hyperparameter_component, fitness, problem.rules)
-
+        
         # store each generated and also valid pipeline in a list for post-processing
         self.all_pipelines.append(pipeline)
+
+        if self.use_surrogate_fitness:
+            fitness = pipeline.get_surrogate_fitness(["support", "confidence"])
         
-        if fitness >= self.best_fitness:
+        if fitness > self.best_fitness:
 
             self.best_fitness = fitness
             self.best_pipeline = pipeline
