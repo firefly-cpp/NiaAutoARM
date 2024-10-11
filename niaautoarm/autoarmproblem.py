@@ -122,7 +122,7 @@ class AutoARMProblem(Problem):
             max_evals=hyperparameter_component[1],
             optimization_type=OptimizationType.MAXIMIZATION)
 
-        algorithm_component.NP = hyperparameter_component[0]
+        algorithm_component.population_size = hyperparameter_component[0] #TODO : This is not correct, need to fix it !!!!!
         
         _, fitness = algorithm_component.run(task=task)
 

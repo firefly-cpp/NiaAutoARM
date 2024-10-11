@@ -21,6 +21,7 @@ class Pipeline:
         self.support = 0
         self.confidence = 0
         self.surrogate_fitness = 0
+        self.surrogate_fitness_metrics = None
 
         if len(rules) > 0:
             self.support = rules.mean("support")
@@ -35,6 +36,7 @@ class Pipeline:
         return self.confidence
     
     def get_surrogate_fitness(self, metrics):
+        self.surrogate_fitness_metrics = metrics
         surrogate_fitness = 0
         for metric in metrics:
             surrogate_fitness += self.rules.mean(metric)
@@ -43,6 +45,13 @@ class Pipeline:
         return self.surrogate_fitness       
 
     def __str__(self):
-        return "\nPreprocessing: {}\nAlgorithm: {}\nHyperparameters: {}\nMetrics: {}\nFitness: {:.4f}\nMean Support: {:.4f}\nMean Confidence: {:.4f}\nRules: {}\n------------------".format(
-            self.preprocessing, self.algorithm, self.parameters, self.metrics, self.fitness, self.support, self.confidence, self.num_rules)
-    
+        return "\nPreprocessing: {}\nAlgorithm: {}\nHyperparameters: {}\nMetrics: {}\nFitness: {:.4f}\nSurrogate Fitness: {} : {:.4f}\nMean Support: {:.4f}\nMean Confidence: {:.4f}\nRules: {}\n------------------".format(self.preprocessing, self.algorithm,
+                                            self.parameters, 
+                                            self.metrics, 
+                                            self.fitness, 
+                                            self.surrogate_fitness_metrics, 
+                                            self.surrogate_fitness,
+                                            self.support, 
+                                            self.confidence, 
+                                            self.num_rules)
+
