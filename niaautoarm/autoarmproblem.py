@@ -106,6 +106,8 @@ class AutoARMProblem(Problem):
             metrics_weights = x[pos_x:]
             metrics_weights = [metrics_weights[i] for i in metrics_indexes]
             metrics_component = dict(zip(metrics_component, metrics_weights))
+            if sum(metrics_weights) == 0:
+                return -np.inf
 
         self.preprocessing_instance.set_preprocessing_algorithms(preprocessing_component)
         dataset = self.preprocessing_instance.apply_preprocessing()
@@ -122,7 +124,7 @@ class AutoARMProblem(Problem):
             max_evals=hyperparameter_component[1],
             optimization_type=OptimizationType.MAXIMIZATION)
 
-        algorithm_component.population_size = hyperparameter_component[0] #TODO : This is not correct, need to fix it !!!!!
+        algorithm_component.population_size = hyperparameter_component[0] #TODO : Check if correct !!!
         
         _, fitness = algorithm_component.run(task=task)
 
@@ -137,13 +139,12 @@ class AutoARMProblem(Problem):
         if self.use_surrogate_fitness:
             fitness = pipeline.get_surrogate_fitness(["support", "confidence"])
         
-        if fitness > self.best_fitness:
+        if fitness >= self.best_fitness:
 
             self.best_fitness = fitness
             self.best_pipeline = pipeline
 
             if self.logger is not None:
                 self.logger.log_pipeline(pipeline)
-        else:
-            print("Fitness: ", fitness) # For debugging purposes, remove later
+    
         return fitness

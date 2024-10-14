@@ -4,26 +4,29 @@ from niaautoarm.armoptimizer import AutoARMOptimizer
 from niapy.algorithms.basic import ParticleSwarmOptimization, DifferentialEvolution, GeneticAlgorithm, FireflyAlgorithm
 from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
 
-import random as rnd
-import numpy as np
+
 import argparse
+import time
 
 def parse_cli():
     cli_parser = argparse.ArgumentParser(description="Run the AutoARM framework.")
-    cli_parser.add_argument("--dataset", type=str, default="datasets/Abalone.csv", help="Path to the dataset.")
+    cli_parser.add_argument("--dataset", type=str, default="Abalone", help="Dataset name. Dataset must be in the datasets folder.")
     cli_parser.add_argument("--algorithm", type=str, default="ParticleSwarmAlgorithm", help="Algorithm to use for optimization of the pipelines.")
-    cli_parser.add_argument("--seed", type=int, default=1337, help="Random seed.")
+    cli_parser.add_argument("--popsize", type=int, default=10, help="Population size.")
+    cli_parser.add_argument("--maxfes", type=int, default=100, help="Maximum number of pipeline evaluation.")
+    cli_parser.add_argument("--ow", type=bool, default=True, help="Optimize metric weights.")
+    cli_parser.add_argument("--amp", type=bool, default=False, help="Allow multiple preprocessing.")
+    cli_parser.add_argument("--sf", type=bool, default=False, help="Use surrogate fitness.")
+    cli_parser.add_argument("--seed", type=int, default=37, help="Random seed.")
     cli_parser.add_argument("--run", type=int, default=1, help="Run number")
     return cli_parser.parse_args()
 
 if __name__ == "__main__":
 
     cli = parse_cli()
-    #rnd.seed(cli.seed)
-    #np.random.seed(cli.seed)
 
     # load dataset from csv
-    data = Dataset(cli.dataset)
+    data = Dataset("datasets/{}.csv".format(cli.dataset))
 
     # define which preprocessing methods to use
     preprocessing = ["min_max_scaling", "squash_cosine", "none"]
@@ -68,12 +71,20 @@ if __name__ == "__main__":
                                 log_output_file=None
                                 )
     
-    pipeline_optimizer.run(
+
+
+    start_run = time.time()
+
+    best_pipeline = pipeline_optimizer.run(
         optimization_algorithm=cli.algorithm,
-        population_size=10,
-        max_evals=100,
+        population_size=cli.popsize,
+        max_evals=cli.maxfes,
         seed=cli.seed,
-        optimize_metric_weights=True,
-        allow_multiple_preprocessing=False,
-        use_surrogate_fitness=False,
+        optimize_metric_weights=cli.ow,
+        allow_multiple_preprocessing=cli.amp,
+        use_surrogate_fitness=cli.sf,
         output_pipeline_file="pipeline_{}_{}_{}.ppln".format(cli.algorithm,cli.dataset,cli.run))
+    end_run = time.time()
+
+    print("Run time: {:.4f} seconds".format(end_run - start_run))    
+    print(best_pipeline)
