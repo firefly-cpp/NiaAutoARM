@@ -12,11 +12,11 @@ def parse_cli():
     cli_parser = argparse.ArgumentParser(description="Run the AutoARM framework.")
     cli_parser.add_argument("--dataset", type=str, default="Abalone", help="Dataset name. Dataset must be in the datasets folder.")
     cli_parser.add_argument("--algorithm", type=str, default="ParticleSwarmAlgorithm", help="Algorithm to use for optimization of the pipelines.")
-    cli_parser.add_argument("--popsize", type=int, default=10, help="Population size.")
-    cli_parser.add_argument("--maxfes", type=int, default=100, help="Maximum number of pipeline evaluation.")
+    cli_parser.add_argument("--popsize", type=int, default=30, help="Population size.")
+    cli_parser.add_argument("--maxfes", type=int, default=500, help="Maximum number of pipeline evaluations.")
     cli_parser.add_argument("--ow", type=bool, default=True, help="Optimize metric weights.")
-    cli_parser.add_argument("--amp", type=bool, default=False, help="Allow multiple preprocessing.")
-    cli_parser.add_argument("--sf", type=bool, default=False, help="Use surrogate fitness.")
+    cli_parser.add_argument("--amp", type=bool, default=True, help="Allow multiple preprocessing.")
+    cli_parser.add_argument("--sf", type=bool, default=True, help="Use surrogate fitness.")
     cli_parser.add_argument("--seed", type=int, default=37, help="Random seed.")
     cli_parser.add_argument("--run", type=int, default=1, help="Run number")
     return cli_parser.parse_args()
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         optimize_metric_weights=cli.ow,
         allow_multiple_preprocessing=cli.amp,
         use_surrogate_fitness=cli.sf,
-        output_pipeline_file="pipeline_{}_{}_{}.ppln".format(cli.algorithm,cli.dataset,cli.run))
+        output_pipeline_file="pipeline_{}_{}_{}_{}_{}.ppln".format(cli.algorithm,cli.dataset,cli.popsize,cli.maxfes,cli.run))
     end_run = time.time()
 
     print("Run time: {:.4f} seconds".format(end_run - start_run))    
