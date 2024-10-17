@@ -24,19 +24,31 @@ class Preprocessing:
                         'none' : 4} #TODO : Use just one of the numbered values for each rank
         
 
+    def has_preprocessing_failed(self,dataset):
+        if dataset is None:
+            return True
+        if dataset.transactions.empty:
+            return True
+        if dataset.transactions.isnull().values.any():
+            return True
+        return False
+
     def set_preprocessing_algorithms(self, preprocessing_algorithms):
         self.preprocessing_algorithms = preprocessing_algorithms
 
     def get_preprocessing_algorithms(self):
         return self.preprocessing_algorithms    
     
-    def apply_preprocessing(self):   
+    def apply_preprocessing(self):
         dataset = self.dataset
         self._reorder_preprocessing_algorithms()
 
         for preprocessing_algorithm in self.preprocessing_algorithms:
             dataset = Dataset(self._apply_preprocessing_algorithm(preprocessing_algorithm,dataset))
-
+        
+        if self.has_preprocessing_failed(dataset):
+            return None
+        
         return dataset
 
 
@@ -52,10 +64,10 @@ class Preprocessing:
         
         elif preprocessing_algorithm == 'squash_euclidean':
             Warning('This method is very slow, need to optimize !!!')
-            return self.squash(dataset, threshold=0.9, similarity='euclidean') #Very slow, need to optimize !!!
+            return self.squash(dataset, threshold=0.95, similarity='euclidean') #Very slow, need to optimize !!!
         
         elif preprocessing_algorithm == 'squash_cosine':
-            return self.squash(dataset, threshold=0.9, similarity='cosine')
+            return self.squash(dataset, threshold=0.95, similarity='cosine')
         
         elif preprocessing_algorithm == 'discretization_equal_frequency':
             return self.discretization_equal_frequency(dataset,q=5)

@@ -88,7 +88,7 @@ class AutoARMProblem(Problem):
         
         # get preprocessing components
         if self.allow_multiple_preprocessing:
-            preprocessing_component = threshold(self.preprocessing_methods, x[pos_x:pos_x + len(self.preprocessing_methods)])
+            _,preprocessing_component = threshold(self.preprocessing_methods, x[pos_x:pos_x + len(self.preprocessing_methods)])
             pos_x += len(self.preprocessing_methods)
         else:
             preprocessing_component = [self.preprocessing_methods[float_to_category(
@@ -111,6 +111,8 @@ class AutoARMProblem(Problem):
 
         self.preprocessing_instance.set_preprocessing_algorithms(preprocessing_component)
         dataset = self.preprocessing_instance.apply_preprocessing()
+        if dataset is None:
+            return -np.inf
 
         problem = NiaARM(
             dataset.dimension,            
@@ -125,8 +127,14 @@ class AutoARMProblem(Problem):
             optimization_type=OptimizationType.MAXIMIZATION)
 
         algorithm_component.population_size = hyperparameter_component[0] #TODO : Check if correct !!!
-        
+
+        #print(algorithm_component)
+        #print(metrics_component)
+        #print(hyperparameter_component)
+        #print(preprocessing_component)
+        # This is a temporary hack to avoid crashing! Some preprocessing methods can return empty dataset
         _, fitness = algorithm_component.run(task=task)
+
 
         if (len(problem.rules) == 0):
             return -np.inf
