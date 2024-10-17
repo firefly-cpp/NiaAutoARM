@@ -15,7 +15,7 @@ def parse_cli():
     cli_parser.add_argument("--popsize", type=int, default=30, help="Population size.")
     cli_parser.add_argument("--maxfes", type=int, default=500, help="Maximum number of pipeline evaluations.")
     cli_parser.add_argument("--ow", type=bool, default=True, help="Optimize metric weights.")
-    cli_parser.add_argument("--amp", type=bool, default=True, help="Allow multiple preprocessing.")
+    cli_parser.add_argument("--amp", type=bool, default=False, help="Allow multiple preprocessing.")
     cli_parser.add_argument("--sf", type=bool, default=True, help="Use surrogate fitness.")
     cli_parser.add_argument("--seed", type=int, default=37, help="Random seed.")
     cli_parser.add_argument("--run", type=int, default=1, help="Run number")
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     data = Dataset("datasets/{}.csv".format(cli.dataset))
 
     # define which preprocessing methods to use
-    preprocessing = ["min_max_scaling", "squash_cosine", "none"]
+    preprocessing = ["min_max_scaling", "squash_cosine", "z_score_normalization", "remove_highly_correlated_features", "discretization_kmeans", "none"]
 
     # define algorithms for searching the association rules
     algorithms = [ParticleSwarmOptimization(min_velocity=-4, max_velocity=4,seed=cli.seed),
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         optimize_metric_weights=cli.ow,
         allow_multiple_preprocessing=cli.amp,
         use_surrogate_fitness=cli.sf,
-        output_pipeline_file="pipeline_{}_{}_{}_{}_{}.ppln".format(cli.algorithm,cli.dataset,cli.popsize,cli.maxfes,cli.run))
+        output_pipeline_file="pipelines/pipeline_{}_{}_{}_{}_{}.ppln".format(cli.algorithm,cli.dataset,cli.popsize,cli.maxfes,cli.run))
     end_run = time.time()
 
     print("Run time: {:.4f} seconds".format(end_run - start_run))    
