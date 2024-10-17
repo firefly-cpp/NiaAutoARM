@@ -35,6 +35,25 @@ class Pipeline:
     def get_rules_confidence(self):
         return self.confidence
     
+    def get_rules(self):
+        return self.rules
+    
+    def get_metrics(self):
+        return self.metrics
+    
+    def get_algorithm(self):
+        return self.algorithm
+    
+    def get_preprocessing(self):
+        r"""Return tuple of an odrdered list of preprocessing techniques."""
+        return tuple(sorted(self.preprocessing))
+    
+    def get_hyperparameters(self):
+        return self.parameters
+    
+    def get_fitness(self):
+        return self.fitness
+    
     def get_surrogate_fitness(self, metrics):
         self.surrogate_fitness_metrics = metrics
         surrogate_fitness = 0
