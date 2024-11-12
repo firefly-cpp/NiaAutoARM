@@ -44,10 +44,12 @@ class Preprocessing:
         self._reorder_preprocessing_algorithms()
 
         for preprocessing_algorithm in self.preprocessing_algorithms:
-            dataset = Dataset(self._apply_preprocessing_algorithm(preprocessing_algorithm,dataset))
-        
-        if self.has_preprocessing_failed(dataset):
-            return None
+            try:
+                dataset = Dataset(self._apply_preprocessing_algorithm(preprocessing_algorithm,dataset))
+            except:
+                return None
+            if self.has_preprocessing_failed(dataset):
+                return None
         
         return dataset
 
@@ -90,6 +92,8 @@ class Preprocessing:
 
     def _reorder_preprocessing_algorithms(self):
         self.preprocessing_algorithms = sorted(self.preprocessing_algorithms, key=lambda x: self._order[x])
+        # Remove multiple occurences of the same rank
+
 
     def _min_max_scaling(self,dataset):
         '''Scale float data to have a minimum of 0 and a maximum of 1'''
@@ -238,5 +242,5 @@ class Preprocessing:
                     colname = correlation_matrix.columns[i]
                     uncorrelated_transactions = uncorrelated_transactions.drop(colname, axis=1)
 
-        print(uncorrelated_transactions)
+        return uncorrelated_transactions
 
