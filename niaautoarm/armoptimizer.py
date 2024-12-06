@@ -90,7 +90,8 @@ class AutoARMOptimizer:
         task = Task(
             problem=problem,
             max_evals=max_evals,
-            optimization_type=OptimizationType.MAXIMIZATION)
+            optimization_type=OptimizationType.MAXIMIZATION,
+            enable_logging=True)
         
         algo.run(task=task)
         arm_best_pipeline = problem.get_best_pipeline()

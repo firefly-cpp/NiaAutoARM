@@ -50,6 +50,9 @@ class Pipeline:
     
     def get_hyperparameters(self):
         return self.parameters
+
+    def clean(self):
+        self.rules = None
     
     def get_fitness(self):
         return self.fitness

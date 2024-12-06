@@ -7,7 +7,7 @@ from niaautoarm.pipeline import Pipeline
 from niaautoarm.preprocessing import Preprocessing
 
 from niaautoarm.utils import calculate_dimension_of_the_problem, float_to_category, float_to_num, threshold
-
+import copy
 
 class AutoARMProblem(Problem):
     r"""Definition of Auto Association Rule Mining.
@@ -89,13 +89,16 @@ class AutoARMProblem(Problem):
         # get preprocessing components
         if self.allow_multiple_preprocessing:
             _,preprocessing_component = threshold(self.preprocessing_methods, x[pos_x:pos_x + len(self.preprocessing_methods)])
+            if len(preprocessing_component) == 0:
+                print("No preprocessing methods selected")
+                preprocessing_component = ('none',)
             pos_x += len(self.preprocessing_methods)
         else:
             preprocessing_component = [self.preprocessing_methods[float_to_category(
             self.preprocessing_methods, x[pos_x])]]
             pos_x += 1       
 
-        metrics_indexes ,metrics_component = threshold(self.metrics, x[pos_x:pos_x + len(self.metrics)])
+        metrics_indexes,metrics_component = threshold(self.metrics, x[pos_x:pos_x + len(self.metrics)])
 
         if metrics_component == ():  # if no metrics are selected TODO: check for alternative solution
             return -np.inf
@@ -141,18 +144,19 @@ class AutoARMProblem(Problem):
 
         pipeline = Pipeline(preprocessing_component, algorithm_component.Name[1], metrics_component, hyperparameter_component, fitness, problem.rules)
         
-        # store each generated and also valid pipeline in a list for post-processing
-        self.all_pipelines.append(pipeline)
-
         if self.use_surrogate_fitness:
-            fitness = pipeline.get_surrogate_fitness(["support", "confidence"])
+            fitness = pipeline.get_surrogate_fitness(["support", "confidence"])      
         
         if fitness >= self.best_fitness:
 
             self.best_fitness = fitness
-            self.best_pipeline = pipeline
+            self.best_pipeline = copy.deepcopy(pipeline)
 
             if self.logger is not None:
                 self.logger.log_pipeline(pipeline)
+
+        # store each generated and also valid pipeline in a list for post-processing
+        pipeline.clean() #HACK due to large MEM required
+        self.all_pipelines.append(pipeline)
     
         return fitness

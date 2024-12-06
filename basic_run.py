@@ -3,6 +3,7 @@ from niaarm.dataset import Dataset
 from niaautoarm.armoptimizer import AutoARMOptimizer
 from niapy.algorithms.basic import ParticleSwarmOptimization, DifferentialEvolution, GeneticAlgorithm, FireflyAlgorithm
 from niapy.algorithms.basic.ga import uniform_crossover, uniform_mutation
+from niapy.algorithms.modified import ImprovedLpsrSuccessHistoryAdaptiveDifferentialEvolution, LpsrSuccessHistoryAdaptiveDifferentialEvolution, SelfAdaptiveDifferentialEvolution
 
 
 import argparse
@@ -14,11 +15,13 @@ def parse_cli():
     cli_parser.add_argument("--algorithm", type=str, default="ParticleSwarmAlgorithm", help="Algorithm to use for optimization of the pipelines.")
     cli_parser.add_argument("--popsize", type=int, default=30, help="Population size.")
     cli_parser.add_argument("--maxfes", type=int, default=500, help="Maximum number of pipeline evaluations.")
-    cli_parser.add_argument("--ow", type=bool, default=True, help="Optimize metric weights.")
-    cli_parser.add_argument("--amp", type=bool, default=False, help="Allow multiple preprocessing.")
-    cli_parser.add_argument("--sf", type=bool, default=True, help="Use surrogate fitness.")
+    cli_parser.add_argument("--ow", dest="ow", default=False, action="store_true", help="Optimize metric weights.")
+    cli_parser.add_argument("--amp", dest="amp", default=False, action="store_true", help="Allow multiple preprocessing.")
+    cli_parser.add_argument("--sf", dest="sf", default=False, action="store_true", help="Use surrogate fitness.")
     cli_parser.add_argument("--seed", type=int, default=37, help="Random seed.")
     cli_parser.add_argument("--run", type=int, default=1, help="Run number")
+    cli_parser.add_argument("--folder", type=str, help="Folder name for the output files (.ppln).")
+
     return cli_parser.parse_args()
 
 if __name__ == "__main__":
@@ -35,7 +38,9 @@ if __name__ == "__main__":
     algorithms = [ParticleSwarmOptimization(min_velocity=-4, max_velocity=4,seed=cli.seed),
                     DifferentialEvolution(crossover_probability=0.9, differential_weight=0.5,seed=cli.seed),
                     GeneticAlgorithm(crossover=uniform_crossover, mutation=uniform_mutation, crossover_rate=0.9, mutation_rate=0.1,seed=cli.seed), 
-                    FireflyAlgorithm(alpha=1.0, beta0=0.2, gamma=1.0,seed=cli.seed)]
+                    ImprovedLpsrSuccessHistoryAdaptiveDifferentialEvolution(seed=cli.seed),
+                    LpsrSuccessHistoryAdaptiveDifferentialEvolution(seed=cli.seed),
+                    SelfAdaptiveDifferentialEvolution(seed=cli.seed)]
 
     # define hyperparameters and their min/max values
     hyperparameter1 = {
@@ -71,8 +76,6 @@ if __name__ == "__main__":
                                 log_output_file=None
                                 )
     
-
-
     start_run = time.time()
 
     best_pipeline = pipeline_optimizer.run(
@@ -83,7 +86,7 @@ if __name__ == "__main__":
         optimize_metric_weights=cli.ow,
         allow_multiple_preprocessing=cli.amp,
         use_surrogate_fitness=cli.sf,
-        output_pipeline_file="pipelines/pipeline_{}_{}_{}_{}_{}.ppln".format(cli.algorithm,cli.dataset,cli.popsize,cli.maxfes,cli.run))
+        output_pipeline_file="pipelines_{}/pipeline_{}_{}_{}_{}_{}.ppln".format(cli.folder,cli.algorithm,cli.dataset,cli.popsize,cli.maxfes,cli.run))
     end_run = time.time()
 
     print("Run time: {:.4f} seconds".format(end_run - start_run))    
