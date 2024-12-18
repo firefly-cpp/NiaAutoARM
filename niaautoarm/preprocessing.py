@@ -91,7 +91,7 @@ class Preprocessing:
         
 
     def _reorder_preprocessing_algorithms(self):
-        print(self.preprocessing_algorithms)
+        #print(self.preprocessing_algorithms)
         self.preprocessing_algorithms = sorted(self.preprocessing_algorithms, key=lambda x: self._order[x])
         # Remove multiple occurences of the same rank
 

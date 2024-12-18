@@ -32,13 +32,13 @@ if __name__ == "__main__":
     data = Dataset("datasets/{}.csv".format(cli.dataset))
 
     # define which preprocessing methods to use
-    preprocessing = ["min_max_scaling", "squash_cosine", "z_score_normalization", "remove_highly_correlated_features", "discretization_kmeans", "none"]
+    preprocessing = ["min_max_scaling", "squash_cosine", "z_score_normalization", "remove_highly_correlated_features", "discretization_kmeans"]
 
     # define algorithms for searching the association rules
     algorithms = [ParticleSwarmOptimization(min_velocity=-4, max_velocity=4,seed=cli.seed),
                     DifferentialEvolution(crossover_probability=0.9, differential_weight=0.5,seed=cli.seed),
                     GeneticAlgorithm(crossover=uniform_crossover, mutation=uniform_mutation, crossover_rate=0.9, mutation_rate=0.1,seed=cli.seed), 
-                    ImprovedLpsrSuccessHistoryAdaptiveDifferentialEvolution(seed=cli.seed),
+                    #ImprovedLpsrSuccessHistoryAdaptiveDifferentialEvolution(seed=cli.seed),
                     LpsrSuccessHistoryAdaptiveDifferentialEvolution(seed=cli.seed),
                     SelfAdaptiveDifferentialEvolution(seed=cli.seed)]
 

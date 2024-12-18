@@ -86,17 +86,45 @@ class AutoARMProblem(Problem):
 
         pos_x += len(self.hyperparameters)
         
+        '''
         # get preprocessing components
         if self.allow_multiple_preprocessing:
             _,preprocessing_component = threshold(self.preprocessing_methods, x[pos_x:pos_x + len(self.preprocessing_methods)])
-            if len(preprocessing_component) == 0:
-                print("No preprocessing methods selected")
-                preprocessing_component = ('none',)
+            #if len(preprocessing_component) == 0:
+                #print("No preprocessing methods selected")
+            #    preprocessing_component = ('none',)
             pos_x += len(self.preprocessing_methods)
         else:
             preprocessing_component = [self.preprocessing_methods[float_to_category(
             self.preprocessing_methods, x[pos_x])]]
             pos_x += 1       
+
+        if len(preprocessing_component) == 0:
+            if self.allow_multiple_preprocessing:
+                preprocessing_component = ('none',)
+            else: 
+                preprocessing_component = ['none']
+
+        '''
+        if self.allow_multiple_preprocessing:
+            _, preprocessing_component = threshold(
+                self.preprocessing_methods, x[pos_x:pos_x + len(self.preprocessing_methods)]
+            )
+            pos_x += len(self.preprocessing_methods)
+        else:
+            preprocessing_component = [
+                self.preprocessing_methods[
+                    float_to_category(self.preprocessing_methods, x[pos_x])
+                ]
+            ]
+            pos_x += 1
+
+        # Ensure at least one preprocessing component is present
+        if not preprocessing_component:
+            preprocessing_component = ('none',) if self.allow_multiple_preprocessing else ['none']
+
+        
+
 
         metrics_indexes,metrics_component = threshold(self.metrics, x[pos_x:pos_x + len(self.metrics)])
 
@@ -130,6 +158,7 @@ class AutoARMProblem(Problem):
             optimization_type=OptimizationType.MAXIMIZATION)
 
         algorithm_component.population_size = hyperparameter_component[0] #TODO : Check if correct !!!
+        print(algorithm_component)
 
         #print(algorithm_component)
         #print(metrics_component)
@@ -137,7 +166,8 @@ class AutoARMProblem(Problem):
         #print(preprocessing_component)
         # This is a temporary hack to avoid crashing! Some preprocessing methods can return empty dataset
         _, fitness = algorithm_component.run(task=task)
-
+        #print(problem.rules)
+        #print(len(problem.rules))
 
         if (len(problem.rules) == 0):
             return -np.inf
