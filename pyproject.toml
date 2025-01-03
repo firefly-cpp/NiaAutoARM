@@ -1,15 +1,18 @@
 [tool.poetry]
 name = "NiaAutoARM"
 version = "0.1.0"
-description = "Automated Association Rule Mining"
-authors = ["Iztok Fister Jr. <iztok@iztok-jr-fister.eu>", "Žiga Stupan <ziga.stupan1@student.um.si>"]
+description = "Automated generation and evaluation of Association Rule Mining pipelines"
+authors = ["Uroš Mlakar <uros.mlakar@um.si>", "Iztok Fister Jr. <iztok@iztok-jr-fister.eu>"]
+keywords = ['association rule mining', 'computational intelligence', 'data mining', 'datasets', 'optimization']
+homepage = "https://github.com/firefly-cpp/NiaAutoARM"
+repository = "https://github.com/firefly-cpp/NiaAutoARM"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-niapy = "^2.0.4"
-niaaml = "^1.1.11"
-pandas = "^1.4.0"
-niaarm = "^0.3.1"
+niapy = "^2.0.5"
+pandas = "^2.1.1"
+niaarm = "^0.3.12"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
