@@ -8,6 +8,24 @@ The numerical association rule mining paradigm that includes concurrent dealing 
 
 ## How it works?
 
+See the following [preprint](https://arxiv.org/pdf/2501.00138) for more information.
+
+## Installation 📦
+
+### pip
+
+Install NiaARM with pip:
+
+```sh
+pip install niaautoarm
+```
+## Usage 🚀
+
+## See also
+
+[1] [NiaARM.jl: Numerical Association Rule Mining in Julia](https://github.com/firefly-cpp/NiaARM.jl)
+
+[2] [arm-preprocessing: Implementation of several preprocessing techniques for Association Rule Mining (ARM)](https://github.com/firefly-cpp/arm-preprocessing)
 
 ## References
 [1] Ž. Stupan, Fister Jr., I. (2022). [NiaARM: A minimalistic framework for Numerical Association Rule Mining](https://www.theoj.org/joss-papers/joss.04448/10.21105.joss.04448.pdf). Journal of Open Source Software, 7(77), 4448.
