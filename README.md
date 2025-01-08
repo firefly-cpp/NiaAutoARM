@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="logo" width="300" src=".github/images/NiaAutoARM.png">
+</p>
+
 # NiaAutoARM
 
 A novel AutoML method for automatically constructing the full association rule mining pipelines based on stochastic population-based metaheuristics.
