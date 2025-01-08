@@ -34,11 +34,11 @@ if __name__ == "__main__":
     # define which preprocessing methods to use
     preprocessing = ["min_max_scaling", "squash_cosine", "z_score_normalization", "remove_highly_correlated_features", "discretization_kmeans"]
 
-    # define algorithms for searching the association rules
+    # define inner algorithms for searching the association rules
     algorithms = [ParticleSwarmOptimization(min_velocity=-4, max_velocity=4,seed=cli.seed),
                     DifferentialEvolution(crossover_probability=0.9, differential_weight=0.5,seed=cli.seed),
                     GeneticAlgorithm(crossover=uniform_crossover, mutation=uniform_mutation, crossover_rate=0.9, mutation_rate=0.1,seed=cli.seed), 
-                    #ImprovedLpsrSuccessHistoryAdaptiveDifferentialEvolution(seed=cli.seed),
+                    ImprovedLpsrSuccessHistoryAdaptiveDifferentialEvolution(seed=cli.seed),
                     LpsrSuccessHistoryAdaptiveDifferentialEvolution(seed=cli.seed),
                     SelfAdaptiveDifferentialEvolution(seed=cli.seed)]
 
@@ -54,10 +54,10 @@ if __name__ == "__main__":
         "min": 2000,
         "max": 10000
     }
-    # create array
+    
     hyperparameters = [hyperparameter1, hyperparameter2]
 
-    # evaluation criteria
+    # association rule evaluation criteria
     metrics = [
         "support",
         "confidence",
@@ -73,7 +73,8 @@ if __name__ == "__main__":
                                 hyperparameters=hyperparameters,
                                 log=True,
                                 log_verbose=True,
-                                log_output_file=None
+                                log_output_file=None,
+                                conserve_space=True
                                 )
     
     start_run = time.time()

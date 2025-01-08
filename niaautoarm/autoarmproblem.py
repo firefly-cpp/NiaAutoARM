@@ -23,10 +23,10 @@ class AutoARMProblem(Problem):
         algorithms (list): Algorithm components (one arbitrary algorithm from niapy collection).
         hyperparameters (list): Selected hyperparameter values.
         metrics (list): Metrics component.
-        optimize_metric_weights
-        allow_multiple_preprocessing
-        use_surrogate_fitness
-        logging (bool): Enable logging of fitness improvements. Default: ``False``.
+        optimize_metric_weights (bool)
+        allow_multiple_preprocessing (bool)
+        use_surrogate_fitness (bool)
+        logger (Logger): Logger instacne for logging fitness improvements.
     """
 
     def __init__(
@@ -39,6 +39,7 @@ class AutoARMProblem(Problem):
             optimize_metric_weights,
             allow_multiple_preprocessing,
             use_surrogate_fitness,
+            conserve_space,
             logger
     ):
         r"""Initialize instance of AutoARM.dataset_class
@@ -56,7 +57,7 @@ class AutoARMProblem(Problem):
         self.hyperparameters = hyperparameters
         self.metrics = metrics
         self.best_fitness = -np.inf
-        self.preprocessing_instance = Preprocessing(dataset,None)
+        self.preprocessing_instance = Preprocessing(dataset, None)
 
         self.logger = logger
         self.all_pipelines = []
@@ -65,6 +66,8 @@ class AutoARMProblem(Problem):
         self.allow_multiple_preprocessing = allow_multiple_preprocessing
         self.optimize_metric_weights = optimize_metric_weights
         self.use_surrogate_fitness = use_surrogate_fitness
+
+        self.conserve_space = conserve_space
 
     def get_best_pipeline(self):
         return self.best_pipeline
@@ -86,26 +89,6 @@ class AutoARMProblem(Problem):
 
         pos_x += len(self.hyperparameters)
         
-        '''
-        # get preprocessing components
-        if self.allow_multiple_preprocessing:
-            _,preprocessing_component = threshold(self.preprocessing_methods, x[pos_x:pos_x + len(self.preprocessing_methods)])
-            #if len(preprocessing_component) == 0:
-                #print("No preprocessing methods selected")
-            #    preprocessing_component = ('none',)
-            pos_x += len(self.preprocessing_methods)
-        else:
-            preprocessing_component = [self.preprocessing_methods[float_to_category(
-            self.preprocessing_methods, x[pos_x])]]
-            pos_x += 1       
-
-        if len(preprocessing_component) == 0:
-            if self.allow_multiple_preprocessing:
-                preprocessing_component = ('none',)
-            else: 
-                preprocessing_component = ['none']
-
-        '''
         if self.allow_multiple_preprocessing:
             _, preprocessing_component = threshold(
                 self.preprocessing_methods, x[pos_x:pos_x + len(self.preprocessing_methods)]
@@ -119,16 +102,13 @@ class AutoARMProblem(Problem):
             ]
             pos_x += 1
 
-        # Ensure at least one preprocessing component is present
+    
         if not preprocessing_component:
             preprocessing_component = ('none',) if self.allow_multiple_preprocessing else ['none']
 
-        
+        metrics_indexes, metrics_component = threshold(self.metrics, x[pos_x:pos_x + len(self.metrics)])
 
-
-        metrics_indexes,metrics_component = threshold(self.metrics, x[pos_x:pos_x + len(self.metrics)])
-
-        if metrics_component == ():  # if no metrics are selected TODO: check for alternative solution
+        if not metrics_component:
             return -np.inf
 
         pos_x += len(self.metrics)
@@ -142,6 +122,7 @@ class AutoARMProblem(Problem):
 
         self.preprocessing_instance.set_preprocessing_algorithms(preprocessing_component)
         dataset = self.preprocessing_instance.apply_preprocessing()
+        
         if dataset is None:
             return -np.inf
 
@@ -151,23 +132,14 @@ class AutoARMProblem(Problem):
             dataset.transactions,
             metrics=metrics_component)        
 
-        # build niapy task
         task = Task(
             problem=problem,
             max_evals=hyperparameter_component[1],
             optimization_type=OptimizationType.MAXIMIZATION)
 
-        algorithm_component.population_size = hyperparameter_component[0] #TODO : Check if correct !!!
-        print(algorithm_component)
+        algorithm_component.population_size = hyperparameter_component[0]
 
-        #print(algorithm_component)
-        #print(metrics_component)
-        #print(hyperparameter_component)
-        #print(preprocessing_component)
-        # This is a temporary hack to avoid crashing! Some preprocessing methods can return empty dataset
         _, fitness = algorithm_component.run(task=task)
-        #print(problem.rules)
-        #print(len(problem.rules))
 
         if (len(problem.rules) == 0):
             return -np.inf
@@ -185,8 +157,9 @@ class AutoARMProblem(Problem):
             if self.logger is not None:
                 self.logger.log_pipeline(pipeline)
 
-        # store each generated and also valid pipeline in a list for post-processing
-        pipeline.clean() #HACK due to large MEM required
+        if self.conserve_space:
+            pipeline.clean()
+
         self.all_pipelines.append(pipeline)
     
         return fitness

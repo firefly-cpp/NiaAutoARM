@@ -61,7 +61,8 @@ class AutoARMOptimizer:
             optimize_metric_weights=False,
             allow_multiple_preprocessing=False,
             use_surrogate_fitness=False,
-            output_pipeline_file=None):
+            output_pipeline_file=None,
+            conserve_space=True):
         r"""Run the AutoARM framework.
         Parameters:
             optimization_algorithm (str): Optimization algorithm.
@@ -72,6 +73,7 @@ class AutoARMOptimizer:
             allow_multiple_preprocessing (bool): Allow multiple preprocessing algorithms.
             use_surrogate_fitness (bool): Use surrogate fitness. Uses the mean of the metrics as the fitness for all pipelines.
             output_pipeline_file (str): Output pipeline file for post processing
+            conserve_space (bool): Conserve space by not storing rules in pipelines.
         """
 
         algo = get_algorithm(optimization_algorithm, population_size=population_size, seed=seed)
@@ -85,6 +87,7 @@ class AutoARMOptimizer:
             optimize_metric_weights,
             allow_multiple_preprocessing,
             use_surrogate_fitness,
+            conserve_space,
             self.logger)
         
         task = Task(
