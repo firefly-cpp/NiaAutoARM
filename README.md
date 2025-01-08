@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="logo" width="300" src=".github/images/NiaAutoARM.png">
+  <img alt="logo" width="500" src=".github/images/NiaAutoARM.png">
 </p>
 
 # NiaAutoARM
