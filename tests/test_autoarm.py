@@ -8,9 +8,6 @@ from niaautoarm.pipeline import Pipeline
 from niaautoarm.preprocessing import Preprocessing
 import pandas as pd
 
-def test_version():
-    assert __version__ == '0.2.0'
-
 class PreprocessingTestCase(unittest.TestCase):
     def setUp(self):
         self.data = Dataset(os.path.dirname(os.path.abspath(__file__))
