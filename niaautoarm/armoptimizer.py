@@ -29,13 +29,14 @@ class AutoARMOptimizer:
 
         self.set_parameters(**kwargs)
 
-    def set_parameters(self, data, feature_prepocessing_techniques, rule_mining_algorithms, metrics, hyperparameters, log=True,log_verbose=False, log_output_file=None):
+    def set_parameters(self, data, feature_prepocessing_techniques, rule_mining_algorithms, metrics, hyperparameters, log=True,log_verbose=False, log_output_file=None,conserve_space=True):
 
         self.data = data
         self.feature_prepocessing_techniques = feature_prepocessing_techniques        
         self.rule_mining_algorithms = rule_mining_algorithms
         self.metrics = metrics
         self.hyperparameters = hyperparameters
+        self.conserve_space = conserve_space
 
         if log is True:
             self.logger = Logger(log_verbose, output_file=log_output_file)
@@ -61,8 +62,8 @@ class AutoARMOptimizer:
             optimize_metric_weights=False,
             allow_multiple_preprocessing=False,
             use_surrogate_fitness=False,
-            output_pipeline_file=None,
-            conserve_space=True):
+            output_pipeline_file=None
+            ):
         r"""Run the AutoARM framework.
         Parameters:
             optimization_algorithm (str): Optimization algorithm.
@@ -87,8 +88,9 @@ class AutoARMOptimizer:
             optimize_metric_weights,
             allow_multiple_preprocessing,
             use_surrogate_fitness,
-            conserve_space,
-            self.logger)
+            self.conserve_space,
+            self.logger
+            )
         
         task = Task(
             problem=problem,
