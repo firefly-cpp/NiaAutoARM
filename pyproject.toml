@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "NiaAutoARM"
-version = "0.1.0"
+version = "0.1.1"
 description = "Automated generation and evaluation of Association Rule Mining pipelines"
 authors = ["Uroš Mlakar <uros.mlakar@um.si>", "Iztok Fister Jr. <iztok@iztok-jr-fister.eu>"]
 keywords = ['association rule mining', 'computational intelligence', 'data mining', 'datasets', 'optimization']
