@@ -1,6 +1,7 @@
 import numpy as np
 class Pipeline:
     r"""Class representing a pipeline.
+    
     Args:
        preprocessing (str): Selected preprocessing techniques.
        algorithm (str): Selected algorithm.
