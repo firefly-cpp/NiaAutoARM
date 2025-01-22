@@ -1,0 +1,5 @@
+niapy
+pandas >= 2.1.1
+niaarm
+Sphinx
+sphinx-rtd-theme

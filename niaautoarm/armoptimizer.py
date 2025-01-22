@@ -65,6 +65,7 @@ class AutoARMOptimizer:
             output_pipeline_file=None
             ):
         r"""Run the AutoARM framework.
+        
         Parameters:
             optimization_algorithm (str): Optimization algorithm.
             population_size (int): Population size.
