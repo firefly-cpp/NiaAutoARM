@@ -66,9 +66,14 @@ Explore the examples [directory](./examples) for more information on how to use 
 
 
 ## 📖 Further read
+
 [1] [NiaARM.jl: Numerical Association Rule Mining in Julia](https://github.com/firefly-cpp/NiaARM.jl)
 
 [2] [arm-preprocessing: Implementation of several preprocessing techniques for Association Rule Mining (ARM)](https://github.com/firefly-cpp/arm-preprocessing)
+
+## 📄 Cite us
+
+Mlakar, U.; Fister, I., Jr.; Fister, I. [NiaAutoARM: Automated Framework for Constructing and Evaluating Association Rule Mining Pipelines](https://doi.org/10.3390/math13121957). Mathematics 2025, 13, 1957. [https://doi.org/10.3390/math13121957](https://doi.org/10.3390/math13121957) 
 
 ## 📝 References
 [1] Ž. Stupan, Fister Jr., I. (2022). [NiaARM: A minimalistic framework for Numerical Association Rule Mining](https://www.theoj.org/joss-papers/joss.04448/10.21105.joss.04448.pdf). Journal of Open Source Software, 7(77), 4448.
