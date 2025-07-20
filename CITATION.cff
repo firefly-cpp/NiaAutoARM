@@ -11,5 +11,5 @@ authors:
 date-released: 2025-01-01
 version: "1.0.0"
 doi: "10.3390/math13121957"
-type: article
 url: "https://doi.org/10.3390/math13121957"
+type: software
