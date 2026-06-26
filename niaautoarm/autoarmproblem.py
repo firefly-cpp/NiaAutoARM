@@ -74,24 +74,32 @@ class AutoARMProblem(Problem):
 
     def get_all_pipelines(self):
         return self.all_pipelines
+    
+    def decode_solution(self, x):
+        r"""Decode a genotype vector into a readable ARM pipeline configuration."""
 
-    def _evaluate(self, x):
-        r"""Evaluate the fitness of the pipeline.
-        """
+        x = np.asarray(x, dtype=float)
 
-        #get the algorithm component
-        algorithm_component = self.algorithms[float_to_category(
-            self.algorithms, x[0])]
-        
-        pos_x = 1
-        
-        hyperparameter_component = float_to_num(self.hyperparameters, x[pos_x:pos_x + len(self.hyperparameters)])
+        pos_x = 0
 
+        # Algorithm component
+        algorithm_index = float_to_category(self.algorithms, x[pos_x])
+        algorithm_component = self.algorithms[algorithm_index]
+        algorithm_name = algorithm_component.Name[1]
+        pos_x += 1
+
+        # Hyperparameter component
+        hyperparameter_component = float_to_num(
+            self.hyperparameters,
+            x[pos_x:pos_x + len(self.hyperparameters)]
+        )
         pos_x += len(self.hyperparameters)
-        
+
+        # Preprocessing component
         if self.allow_multiple_preprocessing:
             _, preprocessing_component = threshold(
-                self.preprocessing_methods, x[pos_x:pos_x + len(self.preprocessing_methods)]
+                self.preprocessing_methods,
+                x[pos_x:pos_x + len(self.preprocessing_methods)]
             )
             pos_x += len(self.preprocessing_methods)
         else:
@@ -102,57 +110,112 @@ class AutoARMProblem(Problem):
             ]
             pos_x += 1
 
-    
         if not preprocessing_component:
-            preprocessing_component = ('none',) if self.allow_multiple_preprocessing else ['none']
+            preprocessing_component = ["none"]
 
-        metrics_indexes, metrics_component = threshold(self.metrics, x[pos_x:pos_x + len(self.metrics)])
+        preprocessing_component = list(preprocessing_component)
+
+        # Metrics component
+        metrics_indexes, metrics_component = threshold(
+            self.metrics,
+            x[pos_x:pos_x + len(self.metrics)]
+        )
+        pos_x += len(self.metrics)
+
+        metrics_component = list(metrics_component)
+
+        # Metric weights
+        metric_weights = None
+
+        if self.optimize_metric_weights:
+            raw_weights = x[pos_x:]
+            selected_weights = [raw_weights[i] for i in metrics_indexes]
+            metric_weights = dict(zip(metrics_component, selected_weights))
+
+        population_size = hyperparameter_component[0]
+        max_evals = hyperparameter_component[1]
+
+        return {
+            "algorithm_index": algorithm_index,
+            "algorithm_name": algorithm_name,
+            "algorithm": algorithm_component,
+
+            "hyperparameters": list(hyperparameter_component),
+            "population_size": population_size,
+            "max_evals": max_evals,
+
+            "preprocessing": preprocessing_component,
+            "metrics": metrics_component,
+            "metric_weights": metric_weights,
+        }
+
+    def _evaluate(self, x):
+        r"""Evaluate the fitness of the pipeline."""
+
+        config = self.decode_solution(x)
+
+        algorithm_component = config["algorithm"]
+        hyperparameter_component = config["hyperparameters"]
+        preprocessing_component = config["preprocessing"]
+        metrics_component = config["metrics"]
 
         if not metrics_component:
             return -np.inf
 
-        pos_x += len(self.metrics)
-
         if self.optimize_metric_weights:
-            metrics_weights = x[pos_x:]
-            metrics_weights = [metrics_weights[i] for i in metrics_indexes]
-            metrics_component = dict(zip(metrics_component, metrics_weights))
-            if sum(metrics_weights) == 0:
+            metrics_component = config["metric_weights"]
+
+            if sum(metrics_component.values()) == 0:
                 return -np.inf
 
         self.preprocessing_instance.set_preprocessing_algorithms(preprocessing_component)
         dataset = self.preprocessing_instance.apply_preprocessing()
-        
+
         if dataset is None:
             return -np.inf
 
         problem = NiaARM(
-            dataset.dimension,            
+            dataset.dimension,
             dataset.features,
             dataset.transactions,
-            metrics=metrics_component)        
+            metrics=metrics_component,
+        )
 
         task = Task(
             problem=problem,
             max_evals=hyperparameter_component[1],
-            optimization_type=OptimizationType.MAXIMIZATION)
+            optimization_type=OptimizationType.MAXIMIZATION,
+        )
 
         algorithm_component.population_size = hyperparameter_component[0]
 
         _, fitness = algorithm_component.run(task=task)
 
-        if (len(problem.rules) == 0):
+        if len(problem.rules) == 0:
             return -np.inf
 
-        pipeline = Pipeline(preprocessing_component, algorithm_component.Name[1], metrics_component, hyperparameter_component, fitness, problem.rules)
-        
-        if self.use_surrogate_fitness:
-            fitness = pipeline.get_surrogate_fitness(["support", "confidence"])      
-        
-        if fitness >= self.best_fitness:
+        pipeline = Pipeline(
+            x,
+            preprocessing_component,
+            algorithm_component.Name[1],
+            metrics_component,
+            hyperparameter_component,
+            fitness,
+            problem.rules,
+        )
 
+        if self.use_surrogate_fitness:
+            fitness = pipeline.get_surrogate_fitness(["support", "confidence"])
+
+        if fitness >= self.best_fitness:
             self.best_fitness = fitness
             self.best_pipeline = copy.deepcopy(pipeline)
+
+            try:
+                self.best_pipeline.solution_vector = np.array(x, copy=True)
+                self.best_pipeline.decoded_config = self.decode_solution(x)
+            except Exception:
+                pass
 
             if self.logger is not None:
                 self.logger.log_pipeline(pipeline)
@@ -161,5 +224,5 @@ class AutoARMProblem(Problem):
             pipeline.clean()
 
         self.all_pipelines.append(pipeline)
-    
+
         return fitness

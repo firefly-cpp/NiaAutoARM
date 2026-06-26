@@ -11,7 +11,8 @@ class Pipeline:
        confidence (float): Confidence value.
     """
 
-    def __init__(self, preprocessing, algorithm, metrics, parameters, fitness, rules):
+    def __init__(self, solution_vector, preprocessing, algorithm, metrics, parameters, fitness, rules):
+        self.solution_vector = solution_vector
         self.preprocessing = preprocessing
         self.algorithm = algorithm
         self.metrics = metrics
@@ -24,11 +25,23 @@ class Pipeline:
         self.surrogate_fitness = 0
         self.surrogate_fitness_metrics = None
 
+        self.pipeline_run_config = None #for cfs
+
         if len(rules) > 0:
             self.support = rules.mean("support")
             self.confidence = rules.mean("confidence")
 
         self.num_rules = len(rules)
+
+
+    def set_run_config(self, pipeline_run_config):
+        self.pipeline_run_config = pipeline_run_config
+
+    def get_run_config(self):
+        return self.pipeline_run_config
+
+    def get_solution_vector(self):
+        return self.solution_vector
 
     def get_rules_support(self):
         return self.support

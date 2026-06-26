@@ -51,7 +51,30 @@ class AutoARMOptimizer:
         return self.rule_mining_algorithms
     
     def get_logger(self):
-        return self.logger    
+        return self.logger
+    
+
+    def build_problem(
+            self,
+            optimize_metric_weights=False,
+            allow_multiple_preprocessing=False,
+            use_surrogate_fitness=True,
+        ):
+            problem = AutoARMProblem(
+                dataset=self.data,
+                preprocessing_methods=self.feature_prepocessing_techniques,
+                algorithms=self.rule_mining_algorithms,
+                hyperparameters=self.hyperparameters,
+                metrics=self.metrics,
+                optimize_metric_weights=optimize_metric_weights,
+                allow_multiple_preprocessing=allow_multiple_preprocessing,
+                use_surrogate_fitness=use_surrogate_fitness,
+                conserve_space=self.conserve_space,
+                logger=self.logger
+                
+        )
+
+            return problem
     
     def run(
             self,
@@ -79,8 +102,14 @@ class AutoARMOptimizer:
         """
 
         algo = get_algorithm(optimization_algorithm, population_size=population_size, seed=seed)
+
+        problem = self.build_problem(
+            optimize_metric_weights=optimize_metric_weights,
+            allow_multiple_preprocessing=allow_multiple_preprocessing,
+            use_surrogate_fitness=use_surrogate_fitness
+        )
                 
-        problem = AutoARMProblem(        
+        '''problem = AutoARMProblem(        
             self.data,
             self.feature_prepocessing_techniques,
             self.rule_mining_algorithms,
@@ -92,6 +121,7 @@ class AutoARMOptimizer:
             self.conserve_space,
             self.logger
             )
+        '''
         
         task = Task(
             problem=problem,
@@ -99,9 +129,22 @@ class AutoARMOptimizer:
             optimization_type=OptimizationType.MAXIMIZATION,
             enable_logging=True)
         
+        pipeline_run_config = {
+            "fps": self.feature_prepocessing_techniques,
+            "rma": self.rule_mining_algorithms,
+            "metrics": self.metrics,
+            "hyperparameters": self.hyperparameters,
+            "ow": optimize_metric_weights,
+            "amp": allow_multiple_preprocessing,
+            "sf": use_surrogate_fitness,           
+        }
+
         algo.run(task=task)
+
         arm_best_pipeline = problem.get_best_pipeline()
-        arm_stats = ARMPipelineStatistics(problem.get_all_pipelines(),arm_best_pipeline)
+        arm_best_pipeline.set_run_config(pipeline_run_config)
+
+        arm_stats = ARMPipelineStatistics(problem.get_all_pipelines(), arm_best_pipeline)
         
         if output_pipeline_file is not None:
             arm_stats.dump_to_file(output_pipeline_file)
