@@ -9,10 +9,10 @@ repository = "https://github.com/firefly-cpp/NiaAutoARM"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
-niapy = "^2.0.5"
+python = ">=3.11"
+niapy = "^2.7.0"
 pandas = "^2.1.1"
-niaarm = "^0.3.12"
+niaarm = "^0.4.7"
 scikit-learn = "^1.6.1"
 sphinx = {version = "^5.0", extras = ["docs"]}
 sphinx-rtd-theme = {version = "^1.0.0", extras = ["docs"]}
