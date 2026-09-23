@@ -22,7 +22,7 @@ copyright = '2025-2026, Uroš Mlakar, Iztok Fister Jr.'
 author = 'Uroš Mlakar, Iztok Fister Jr.'
 
 # The full version, including alpha/beta/rc tags
-release = '0.2.0'
+release = '0.2.1'
 
 # -- General configuration ---------------------------------------------------
 
