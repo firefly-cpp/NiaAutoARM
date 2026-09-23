@@ -42,7 +42,7 @@
 A novel AutoML method for automatically constructing the full association rule mining pipelines based on stochastic population-based metaheuristics.
 
 * **Free software:** MIT license
-* **Python**: 3.9, 3.10, 3.11, 3.12
+* **Python**: 3.9, 3.10, 3.11, 3.12, 3.13
 
 ## 🔍 About
 
@@ -50,7 +50,7 @@ The numerical association rule mining paradigm that includes concurrent dealing 
 
 ## 💡 How it works?
 
-See the following [preprint](https://arxiv.org/pdf/2501.00138) for more information.
+See the following [research paper](https://www.mdpi.com/2227-7390/13/12/1957) for more information.
 
 ## 📦 Installation
 ### pip

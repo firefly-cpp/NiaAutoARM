@@ -10,7 +10,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.11"
-niapy = "^2.7.0"
+niapy = "^2.7.1"
 pandas = "^2.1.1"
 niaarm = "^0.4.7"
 scikit-learn = "^1.6.1"
